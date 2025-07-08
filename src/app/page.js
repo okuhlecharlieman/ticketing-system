@@ -1,68 +1,83 @@
 "use client"
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { db } from "../lib/firebase";
 import { ref, push, onValue } from "firebase/database";
+
+const NEWS_API_KEY = process.env.NEXT_PUBLIC_GNEWS_API_KEY;
 
 export default function Home() {
   const [tickets, setTickets] = useState([]);
   const [newTicket, setNewTicket] = useState("");
+  const [news, setNews] = useState([]);
 
+  // Fetch tickets from Firebase
   useEffect(() => {
     const ticketsRef = ref(db, "tickets");
-    onValue(ticketsRef, (snapshot) => {
-      const data = snapshot.val() || {};
+    onValue(
+      ticketsRef,
+      (snapshot) => {
+        const data = snapshot.val() || {};
+        setTickets(Object.entries(data));
+      },
+      (error) => {
+        console.error("Error fetching tickets:", error);
+      }
+    );
+  }, []);
 
-      console.log("Fetched tickets from DB:", data); // Debugging
-      setTickets(Object.entries(data));
-    }, (error) => {
-      console.error("Error fetching tickets:", error); // Debugging
-    });
+  // Fetch news from GNews API
+  useEffect(() => {
+    fetch(`https://gnews.io/api/v4/top-headlines?lang=en&token=${NEWS_API_KEY}`)
+      .then((res) => res.json())
+      .then((data) => setNews(data.articles || []))
+      .catch((err) => console.error("Error fetching news:", err));
   }, []);
 
   const addTicket = async () => {
-    if (!newTicket) {
-      console.log("No ticket text entered."); // Debugging
-      return;
-    }
-    console.log("Attempting to add ticket:", newTicket); // Debugging
+    if (!newTicket) return;
     try {
       await push(ref(db, "tickets"), { text: newTicket, created: Date.now() });
-      console.log("Ticket added successfully!"); // Debugging
       setNewTicket("");
     } catch (error) {
-      console.error("Error adding ticket:", error); // Debugging
+      console.error("Error adding ticket:", error);
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center py-10">
-      <div className="bg-white shadow-md rounded-lg p-8 w-full max-w-md">
-        <h1 className="text-2xl font-bold mb-6 text-center text-blue-600">🎫 Tickets</h1>
-        <div className="flex gap-2 mb-6">
-          <input
-            className="flex-1 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-            value={newTicket}
-            onChange={(e) => setNewTicket(e.target.value)}
-            placeholder="New ticket"
-          />
-          <button
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-            onClick={addTicket}
-          >
-            Add
-          </button>
-        </div>
-        <ul className="space-y-2">
-          {tickets.map(([id, ticket]) => (
-            <li
-              key={id}
-              className="bg-blue-50 border border-blue-200 rounded px-4 py-2 text-gray-800"
+      {/* Navigation */}
+      <nav className="mb-8 flex gap-4">
+        <Link href="/log-ticket" className="text-blue-600 underline hover:text-blue-800">
+          Log a Ticket
+        </Link>
+        <Link href="/technician" className="text-blue-600 underline hover:text-blue-800">
+          Technician Dashboard
+        </Link>
+      </nav>
+
+      {/* News Section */}
+      <div className="w-full max-w-2xl mb-8">
+        <h2 className="text-xl font-bold mb-4 text-blue-600">Latest News</h2>
+        <div className="grid gap-4">
+          {news.length === 0 && <p className="text-gray-500">Loading news...</p>}
+          {news.map((article, idx) => (
+            <a
+              key={idx}
+              href={article.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block bg-white rounded shadow p-4 hover:bg-blue-50 transition"
             >
-              {ticket.text}
-            </li>
+              <div className="font-semibold">{article.title}</div>
+              <div className="text-sm text-gray-600">{article.source?.name}</div>
+              <div className="text-xs text-gray-500">{article.publishedAt?.slice(0, 10)}</div>
+            </a>
           ))}
-        </ul>
+        </div>
       </div>
+
+     
     </div>
   );
 }
