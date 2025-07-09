@@ -40,6 +40,9 @@ export default function Technician() {
                 <div className="text-xs text-gray-400 mt-1">
                   Logged at: {ticket.createdAt || (ticket.created ? new Date(ticket.created).toLocaleString() : "N/A")}
                 </div>
+                <div className="text-xs text-gray-500 mt-1">
+                  Logged by: {ticket.loggedBy || "Unknown"}
+                </div>
               </div>
               <div className="flex gap-2 mt-2 md:mt-0">
                 {ticket.status !== "resolved" && (

@@ -1,24 +1,45 @@
 "use client"
 import { useState } from "react";
-import { db } from "../../lib/firebase";
-import { ref, push } from "firebase/database";
+import { db, auth } from "../../lib/firebase";
+import { ref, push, get } from "firebase/database";
+import { onAuthStateChanged } from "firebase/auth";
 
 export default function LogTicket() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [user, setUser] = useState(null);
+
+  // Listen for auth state
+  React.useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
 
   const submitTicket = async () => {
     if (!title || !description) {
       alert("Please fill in all fields.");
       return;
     }
+    if (!user) {
+      alert("You must be logged in to submit a ticket.");
+      return;
+    }
     try {
+      // Fetch user profile from database
+      const userRef = ref(db, "users/" + user.uid);
+      const snapshot = await get(userRef);
+      const userData = snapshot.val();
+
       await push(ref(db, "tickets"), {
         title,
         description,
         status: "open",
         created: Date.now(),
-        createdAt: new Date().toLocaleString(), // Add this line
+        createdAt: new Date().toLocaleString(),
+        loggedBy: userData ? `${userData.name} ${userData.surname}` : user.email,
+        loggedByUid: user.uid,
       });
       setTitle("");
       setDescription("");

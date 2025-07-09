@@ -1,24 +1,29 @@
 "use client"
 import { useState } from "react";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../lib/firebase";
+import { auth, db } from "../../lib/firebase";
+import { ref, set } from "firebase/database";
 import { useRouter } from "next/navigation";
 
 export default function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [surname, setSurname] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
 
   const handleSignUp = async (e) => {
     e.preventDefault();
     setError("");
-    // if (!email.endsWith("@yourcompany.com")) {
-    //   setError("Please use your company email address.");
-    //   return;
-    // }
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      // Save name and surname to Realtime Database
+      await set(ref(db, "users/" + userCredential.user.uid), {
+        name,
+        surname,
+        email,
+      });
       router.push("/technician"); // Redirect after sign up
     } catch (err) {
       setError(err.message);
@@ -29,6 +34,22 @@ export default function SignUp() {
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <form onSubmit={handleSignUp} className="bg-white p-8 rounded shadow-md w-full max-w-md">
         <h2 className="text-xl font-bold mb-4 text-blue-600">Sign Up</h2>
+        <input
+          className="w-full mb-3 px-3 py-2 border rounded"
+          type="text"
+          placeholder="Name"
+          value={name}
+          onChange={e => setName(e.target.value)}
+          required
+        />
+        <input
+          className="w-full mb-3 px-3 py-2 border rounded"
+          type="text"
+          placeholder="Surname"
+          value={surname}
+          onChange={e => setSurname(e.target.value)}
+          required
+        />
         <input
           className="w-full mb-3 px-3 py-2 border rounded"
           type="email"
