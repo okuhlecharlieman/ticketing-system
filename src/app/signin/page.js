@@ -49,7 +49,7 @@ export default function SignIn() {
           Sign In
         </button>
         <div className="mt-4 text-sm text-center">
-          Don't have an account? <a href="/signup" className="text-blue-600 underline">Sign Up</a>
+          Don&apos;t have an account? <a href="/signup" className="text-blue-600 underline">Sign Up</a>
         </div>
       </form>
     </div>
