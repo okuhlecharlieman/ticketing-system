@@ -3,6 +3,8 @@ import { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../lib/firebase";
 import { useRouter } from "next/navigation";
+import Navbar from "../../components/Navbar"; // Add this import
+
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
@@ -22,7 +24,8 @@ export default function SignIn() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
+      <Navbar /> {/* Add Navbar here */}
       <form onSubmit={handleSignIn} className="bg-white p-8 rounded shadow-md w-full max-w-md">
         <h2 className="text-xl font-bold mb-4 text-blue-600">Sign In</h2>
         <input

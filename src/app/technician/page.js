@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { db, auth } from "../../lib/firebase";
 import { ref, onValue, update, remove, get } from "firebase/database";
 import { useRouter } from "next/navigation";
+import Navbar from "../../components/Navbar"; // <-- Add this import
 
 export default function Technician() {
   const [tickets, setTickets] = useState([]);
@@ -51,7 +52,8 @@ export default function Technician() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
+      <Navbar /> {/* Add Navbar here */}
       <div className="bg-white p-8 rounded shadow-md w-full max-w-2xl">
         <h2 className="text-xl font-bold mb-4 text-blue-600">Technician Dashboard</h2>
         <ul className="space-y-4">

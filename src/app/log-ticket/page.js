@@ -1,9 +1,9 @@
 "use client"
-import React from "react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { db, auth } from "../../lib/firebase";
 import { ref, push, get } from "firebase/database";
 import { onAuthStateChanged } from "firebase/auth";
+import Navbar from "../../components/Navbar"; // <-- Import Navbar
 
 export default function LogTicket() {
   const [title, setTitle] = useState("");
@@ -51,7 +51,8 @@ export default function LogTicket() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
+      <Navbar /> {/* Add Navbar here */}
       <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
         <h2 className="text-xl font-bold mb-4 text-blue-600">Log a Ticket</h2>
         <input
