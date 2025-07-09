@@ -18,6 +18,7 @@ export default function LogTicket() {
         description,
         status: "open",
         created: Date.now(),
+        createdAt: new Date().toLocaleString(), // Add this line
       });
       setTitle("");
       setDescription("");

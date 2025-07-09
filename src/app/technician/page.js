@@ -37,6 +37,9 @@ export default function Technician() {
                 <span className={`text-xs font-semibold ${ticket.status === "resolved" ? "text-green-600" : "text-gray-500"}`}>
                   Status: {ticket.status}
                 </span>
+                <div className="text-xs text-gray-400 mt-1">
+                  Logged at: {ticket.createdAt || (ticket.created ? new Date(ticket.created).toLocaleString() : "N/A")}
+                </div>
               </div>
               <div className="flex gap-2 mt-2 md:mt-0">
                 {ticket.status !== "resolved" && (
