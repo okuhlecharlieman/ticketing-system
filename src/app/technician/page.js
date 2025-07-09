@@ -1,18 +1,40 @@
 "use client"
 import { useEffect, useState } from "react";
-import { db } from "../../lib/firebase";
-import { ref, onValue, update, remove } from "firebase/database";
+import { db, auth } from "../../lib/firebase";
+import { ref, onValue, update, remove, get } from "firebase/database";
+import { useRouter } from "next/navigation";
 
 export default function Technician() {
   const [tickets, setTickets] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isTechnician, setIsTechnician] = useState(null);
+  const router = useRouter();
 
   useEffect(() => {
-    const ticketsRef = ref(db, "tickets");
-    onValue(ticketsRef, (snapshot) => {
-      const data = snapshot.val() || {};
-      setTickets(Object.entries(data));
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        router.push("/signin");
+        return;
+      }
+      // Check technician status
+      const userRef = ref(db, "users/" + user.uid);
+      const snapshot = await get(userRef);
+      const userData = snapshot.val();
+      if (!userData?.isTechnician) {
+        router.push("/"); // redirect non-technicians
+        return;
+      }
+      setIsTechnician(true);
+      // Load tickets
+      const ticketsRef = ref(db, "tickets");
+      onValue(ticketsRef, (snapshot) => {
+        const data = snapshot.val() || {};
+        setTickets(Object.entries(data));
+        setLoading(false);
+      });
     });
-  }, []);
+    return () => unsubscribe();
+  }, [router]);
 
   const markResolved = async (id, ticket) => {
     await update(ref(db, `tickets/${id}`), { ...ticket, status: "resolved" });
@@ -23,6 +45,10 @@ export default function Technician() {
       await remove(ref(db, `tickets/${id}`));
     }
   };
+
+  if (loading || isTechnician === null) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">

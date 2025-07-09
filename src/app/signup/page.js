@@ -11,6 +11,7 @@ export default function SignUp() {
   const [name, setName] = useState("");
   const [surname, setSurname] = useState("");
   const [error, setError] = useState("");
+  const [isTechnician, setIsTechnician] = useState("no"); // new state
   const router = useRouter();
 
   const handleSignUp = async (e) => {
@@ -18,13 +19,14 @@ export default function SignUp() {
     setError("");
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      // Save name and surname to Realtime Database
+      // Save name, surname, email, and technician status
       await set(ref(db, "users/" + userCredential.user.uid), {
         name,
         surname,
         email,
+        isTechnician: isTechnician === "yes",
       });
-      router.push("/technician"); // Redirect after sign up
+      router.push("/technician");
     } catch (err) {
       setError(err.message);
     }
@@ -66,6 +68,16 @@ export default function SignUp() {
           onChange={e => setPassword(e.target.value)}
           required
         />
+        <select
+          className="w-full mb-3 px-3 py-2 border rounded"
+          value={isTechnician}
+          onChange={e => setIsTechnician(e.target.value)}
+          required
+        >
+          <option value="no">Are you a technician?</option>
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
         {error && <div className="text-red-600 text-sm mb-2">{error}</div>}
         <button
           className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
