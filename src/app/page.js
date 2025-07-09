@@ -46,6 +46,12 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center py-10">
+      {/* App Title and Welcome */}
+      <header className="mb-8 text-center">
+        <h1 className="text-3xl font-bold text-blue-700 mb-2">Welcome to the Ticketing System</h1>
+        <p className="text-gray-600">Log issues, view news, and manage tickets with ease.</p>
+      </header>
+
       {/* Navigation */}
       <nav className="mb-8 flex gap-4">
         <Link href="/log-ticket" className="text-blue-600 underline hover:text-blue-800">
@@ -53,6 +59,12 @@ export default function Home() {
         </Link>
         <Link href="/technician" className="text-blue-600 underline hover:text-blue-800">
           Technician Dashboard
+        </Link>
+        <Link href="/signin" className="text-green-600 underline hover:text-green-800">
+          Sign In
+        </Link>
+        <Link href="/signup" className="text-purple-600 underline hover:text-purple-800">
+          Sign Up
         </Link>
       </nav>
 
