@@ -3,20 +3,25 @@ import React, { useState } from "react";
 import { db, auth } from "../../lib/firebase";
 import { ref, push, get } from "firebase/database";
 import { onAuthStateChanged } from "firebase/auth";
+import { useRouter } from "next/navigation";
 import Navbar from "../../components/Navbar"; // <-- Import Navbar
 
 export default function LogTicket() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [user, setUser] = useState(null);
+  const router = useRouter();
 
   // Listen for auth state
   React.useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
+      if (!currentUser) {
+        router.push("/signin"); // Redirect if not signed in
+      }
     });
     return () => unsubscribe();
-  }, []);
+  }, [router]);
 
   const submitTicket = async () => {
     if (!title || !description) {
