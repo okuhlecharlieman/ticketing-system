@@ -99,7 +99,7 @@ export default function Home() {
 
         {/* News Section */}
         <div className="w-full max-w-3xl">
-          <h2 className="text-2xl font-bold mb-4 text-blue-600 dark:text-blue-300">📰 What&apos;'s Happening?</h2>
+          <h2 className="text-2xl font-bold mb-4 text-blue-600 dark:text-blue-300">📰 What&apos;s Happening?</h2>
           <div className="grid gap-4">
             {news.length === 0 && <p className="text-gray-500">Loading news...</p>}
             {news.map((article, idx) => (
