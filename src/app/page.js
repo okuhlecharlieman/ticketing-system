@@ -57,7 +57,7 @@ export default function Home() {
   return (
     <div className={`${darkMode ? "bg-zinc-900 text-white" : "bg-blue-50 text-gray-900"} min-h-screen transition-colors duration-500`}>
       <div className="flex justify-between items-center px-6 py-4 shadow-md sticky top-0 bg-opacity-90 backdrop-blur-md z-10">
-        <h1 className="text-2xl font-bold text-blue-600 dark:text-blue-300">🎫 Ticketing Hub</h1>
+        <h1 className="text-2xl font-bold text-blue-600 dark:text-blue-300">🎫 Tickitie</h1>
         <button onClick={() => setDarkMode(!darkMode)} className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-zinc-700 transition">
           {darkMode ? <Sun size={20} /> : <Moon size={20} />}
         </button>

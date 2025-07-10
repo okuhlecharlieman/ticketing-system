@@ -1,13 +1,15 @@
-"use client"
+"use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { auth, db } from "../lib/firebase";
 import { ref, get } from "firebase/database";
 import { signOut } from "firebase/auth";
+import { Moon, Sun } from "lucide-react"; // Make sure this is installed
 
 export default function Navbar() {
   const [user, setUser] = useState(null);
   const [isTechnician, setIsTechnician] = useState(false);
+  const [darkMode, setDarkMode] = useState(false); // Optional toggle here
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
@@ -30,41 +32,56 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="mb-8 flex gap-4 bg-white shadow px-6 py-3 rounded w-full max-w-2xl mx-auto items-center">
-      <Link href="/" className="font-bold text-blue-700 hover:underline">
-        Home
+    <nav className={`w-full px-4 py-3 mb-8 shadow-md flex justify-between items-center
+      ${darkMode ? "bg-zinc-800 text-white" : "bg-white text-gray-900"}
+      transition-colors duration-300`}>
+      
+      {/* Logo / Title */}
+      <Link href="/" className="text-lg font-extrabold text-blue-600 dark:text-blue-300">
+        🎫 Tickitie
       </Link>
-      <Link href="/log-ticket" className="text-blue-600 hover:underline">
-        Log a Ticket
-      </Link>
-      {isTechnician && (
-        <Link href="/technician" className="text-blue-600 hover:underline">
-          Technician Dashboard
+
+      {/* Nav Links */}
+      <div className="flex items-center gap-4 text-sm">
+        <Link href="/log-ticket" className="hover:underline hover:text-blue-500">
+          Log Ticket
         </Link>
-      )}
-      {!user && (
-        <>
-          <Link href="/signin" className="text-green-600 hover:underline">
-            Sign In
+        {isTechnician && (
+          <Link href="/technician" className="hover:underline hover:text-indigo-500">
+            Dashboard
           </Link>
-          <Link href="/signup" className="text-purple-600 hover:underline">
-            Sign Up
-          </Link>
-        </>
-      )}
-      {user && (
-        <>
-          <span className="ml-auto text-gray-500 text-sm">
-            {user.email} ({isTechnician ? "Technician" : "User"})
-          </span>
-          <button
-            onClick={handleLogout}
-            className="ml-4 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-700 text-xs"
-          >
-            Logout
-          </button>
-        </>
-      )}
+        )}
+        {!user && (
+          <>
+            <Link href="/signin" className="hover:underline text-green-600">
+              Sign In
+            </Link>
+            <Link href="/signup" className="hover:underline text-purple-600">
+              Sign Up
+            </Link>
+          </>
+        )}
+        {user && (
+          <>
+            <span className="text-xs text-gray-500 dark:text-gray-300">
+              {user.email} ({isTechnician ? "Technician" : "User"})
+            </span>
+            <button
+              onClick={handleLogout}
+              className="text-xs bg-red-500 text-white px-3 py-1 rounded hover:bg-red-700"
+            >
+              Logout
+            </button>
+          </>
+        )}
+        {/* Theme Toggle */}
+        <button
+          onClick={() => setDarkMode(!darkMode)}
+          className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-zinc-700 transition"
+        >
+          {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+        </button>
+      </div>
     </nav>
   );
 }
