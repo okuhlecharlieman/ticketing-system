@@ -9,88 +9,131 @@ import Navbar from "../../components/Navbar";
 export default function LogTicket() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [user, setUser] = useState(null); // Logged-in user
-  const [isTech, setIsTech] = useState(false); // Check if user is a technician
-  const [allUsers, setAllUsers] = useState([]); // All users in the system
-  const [selectedUser, setSelectedUser] = useState(""); // User selected by the technician
+  const [user, setUser] = useState(null);
+  const [isTech, setIsTech] = useState(false);
+  const [allUsers, setAllUsers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState("");
   const router = useRouter();
 
-  // Listen for auth state and fetch user data
   useEffect(() => {
+    console.log("Setting up auth listener...");
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      console.log("Auth state changed:", currentUser);
       setUser(currentUser);
 
       if (!currentUser) {
-        router.push("/signin"); // Redirect if not signed in
+        console.log("User not logged in. Redirecting to /signin");
+        router.push("/signin");
         return;
       }
 
-      // Fetch logged-in user's profile to check if they are a technician
-      const userRef = ref(db, "users/" + currentUser.uid);
-      const snapshot = await get(userRef);
-      const userData = snapshot.val();
+      try {
+        const userRef = ref(db, "users/" + currentUser.uid);
+        const snapshot = await get(userRef);
+        const userData = snapshot.val();
+        console.log("User data:", userData);
 
-      if (userData?.isTechnician) {
-        setIsTech(true);
+        if (userData?.isTechnician) {
+          console.log("User is a technician");
+          setIsTech(true);
 
-        // Fetch all users for technician
-        const allUsersRef = ref(db, "users");
-        const allUsersSnapshot = await get(allUsersRef);
-        const users = [];
-        allUsersSnapshot.forEach((childSnapshot) => {
-          users.push({
-            id: childSnapshot.key,
-            name: childSnapshot.val().name,
-            surname: childSnapshot.val().surname,
-            email: childSnapshot.val().email,
+          const allUsersRef = ref(db, "users");
+          const allUsersSnapshot = await get(allUsersRef);
+          const users = [];
+
+          allUsersSnapshot.forEach((childSnapshot) => {
+            const val = childSnapshot.val();
+            users.push({
+              id: childSnapshot.key,
+              name: val.name,
+              surname: val.surname,
+              email: val.email,
+            });
           });
-        });
-        setAllUsers(users);
+
+          setAllUsers(users);
+          console.log("Fetched all users:", users);
+        }
+      } catch (err) {
+        console.error("Error fetching user data:", err);
       }
     });
 
-    return () => unsubscribe();
+    return () => {
+      console.log("Cleaning up auth listener.");
+      unsubscribe();
+    };
   }, [router]);
 
   const submitTicket = async () => {
+    console.log("Submit ticket clicked");
     if (!title || !description) {
+      console.warn("Missing title or description");
       alert("Please fill in all fields.");
       return;
     }
+
     if (!user) {
+      console.warn("User not logged in during ticket submission");
       alert("You must be logged in to submit a ticket.");
       return;
     }
 
     try {
-      // Prepare ticket data
       const ticketData = {
         title,
         description,
         status: "open",
         created: Date.now(),
         createdAt: new Date().toLocaleString(),
-        loggedBy: user.email, // Email of the person logging the ticket
+        loggedBy: user.email,
         loggedByUid: user.uid,
       };
 
-      // If the user is a technician logging for someone else
       if (isTech && selectedUser) {
-        ticketData.loggedFor = selectedUser; // User ID of the person the ticket is logged for
-        ticketData.isLoggedByTech = true; // Flag to mark technician action
+        ticketData.loggedFor = selectedUser;
+        ticketData.isLoggedByTech = true;
+        console.log("Technician logging for user:", selectedUser);
       }
 
-      // Push ticket to Firebase
+      console.log("Submitting ticket data to Firebase:", ticketData);
       await push(ref(db, "tickets"), ticketData);
+      console.log("Ticket successfully submitted to Firebase");
 
-      // Reset form fields
+      // Send email notification
+      console.log("Preparing to send email...");
+      const emailPayload = {
+        title,
+        description,
+        email: user.email,
+      };
+
+      console.log("Email payload:", emailPayload);
+      const response = await fetch("/.netlify/functions/sendTicketEmail", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(emailPayload),
+      });
+
+      const responseText = await response.text();
+      console.log("Email function response status:", response.status);
+      console.log("Email function response body:", responseText);
+
+      if (!response.ok) {
+        console.error("Email failed to send:", responseText);
+        alert("⚠️ Email notification failed.");
+      } else {
+        console.log("✅ Email sent successfully.");
+      }
+
+      // Reset form
       setTitle("");
       setDescription("");
       setSelectedUser("");
-
       alert("Ticket submitted!");
-    } catch (error) {
-      alert("Error submitting ticket: " + error.message);
+    } catch (err) {
+      console.error("❌ Error submitting ticket:", err);
+      alert("Error submitting ticket: " + err.message);
     }
   };
 
