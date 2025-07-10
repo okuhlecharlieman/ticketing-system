@@ -4,12 +4,11 @@ import { useEffect, useState } from "react";
 import { auth, db } from "../lib/firebase";
 import { ref, get } from "firebase/database";
 import { signOut } from "firebase/auth";
-import { Moon, Sun } from "lucide-react"; // Make sure this is installed
+import { Moon, Sun } from "lucide-react";
 
-export default function Navbar() {
+export default function Navbar({ darkMode, setDarkMode }) {
   const [user, setUser] = useState(null);
   const [isTechnician, setIsTechnician] = useState(false);
-  const [darkMode, setDarkMode] = useState(false); // Optional toggle here
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
@@ -32,10 +31,11 @@ export default function Navbar() {
   };
 
   return (
-    <nav className={`w-full px-4 py-3 mb-8 shadow-md flex justify-between items-center
+    <nav
+      className={`w-full px-4 py-3 mb-8 shadow-md flex justify-between items-center
       ${darkMode ? "bg-zinc-800 text-white" : "bg-white text-gray-900"}
-      transition-colors duration-300`}>
-      
+      transition-colors duration-300`}
+    >
       {/* Logo / Title */}
       <Link href="/" className="text-lg font-extrabold text-blue-600 dark:text-blue-300">
         🎫 Tickitie
@@ -74,10 +74,12 @@ export default function Navbar() {
             </button>
           </>
         )}
+
         {/* Theme Toggle */}
         <button
           onClick={() => setDarkMode(!darkMode)}
           className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-zinc-700 transition"
+          aria-label="Toggle dark mode"
         >
           {darkMode ? <Sun size={18} /> : <Moon size={18} />}
         </button>

@@ -4,7 +4,6 @@ import { db, auth } from "../../lib/firebase";
 import { ref, push, get } from "firebase/database";
 import { onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/navigation";
-import { Moon, Sun } from "lucide-react";
 import Navbar from "../../components/Navbar";
 
 export default function LogTicket() {
@@ -111,29 +110,46 @@ export default function LogTicket() {
   };
 
   return (
-    <div className={`${darkMode ? "bg-zinc-900 text-white" : "bg-blue-50 text-gray-900"} min-h-screen transition-colors duration-500`}>
-      <Navbar />
-
-      {/* Theme Toggle */}
-      {/* <div className="flex justify-end px-6 pt-4">
-        <button
-          onClick={() => setDarkMode(!darkMode)}
-          className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-zinc-700 transition"
-        >
-          {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-        </button>
-      </div> */}
+    <div
+      className={`${
+        darkMode ? "bg-gray-900 text-gray-100" : "bg-gray-50 text-gray-900"
+      } min-h-screen transition-colors duration-500`}
+    >
+      {/* Pass darkMode and setDarkMode to Navbar */}
+      <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
 
       {/* Ticket Form */}
-      <div className="flex justify-center items-center py-10">
-        <div className="bg-white dark:bg-zinc-800 p-8 rounded-2xl shadow-lg w-full max-w-md">
-          <h2 className="text-2xl font-bold mb-6 text-blue-600 dark:text-blue-300">📝 Log a Ticket</h2>
+      <div className="flex justify-center items-center py-12 px-4 sm:px-6 lg:px-8">
+        <div
+          className={`w-full max-w-lg rounded-3xl shadow-xl p-10 ${
+            darkMode ? "bg-gray-800" : "bg-white"
+          }`}
+        >
+          <h2
+            className={`text-3xl font-extrabold mb-8 ${
+              darkMode ? "text-indigo-300" : "text-indigo-600"
+            }`}
+          >
+            📝 Log a Ticket
+          </h2>
 
           {isTech && (
-            <div className="mb-4">
-              <label className="block mb-2 text-sm font-medium">Log Ticket For</label>
+            <div className="mb-6">
+              <label
+                className={`block mb-2 text-sm font-semibold ${
+                  darkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
+                Log Ticket For
+              </label>
               <select
-                className="w-full px-3 py-2 border rounded dark:bg-zinc-700 dark:text-white"
+                className={`w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2
+                  focus:ring-indigo-400 transition
+                  ${
+                    darkMode
+                      ? "bg-gray-700 border-gray-600 text-gray-200"
+                      : "bg-gray-100 border-gray-300 text-gray-900"
+                  }`}
                 value={selectedUser}
                 onChange={(e) => setSelectedUser(e.target.value)}
               >
@@ -148,21 +164,35 @@ export default function LogTicket() {
           )}
 
           <input
-            className="w-full mb-3 px-3 py-2 border rounded dark:bg-zinc-700 dark:text-white"
+            type="text"
+            className={`w-full mb-5 px-5 py-3 rounded-2xl border placeholder-gray-400
+              focus:outline-none focus:ring-2 focus:ring-indigo-400 transition
+              ${
+                darkMode
+                  ? "bg-gray-700 border-gray-600 text-gray-200"
+                  : "bg-gray-100 border-gray-300 text-gray-900"
+              }`}
             placeholder="Title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
           <textarea
-            className="w-full mb-4 px-3 py-2 border rounded dark:bg-zinc-700 dark:text-white"
+            className={`w-full mb-6 px-5 py-3 rounded-2xl border placeholder-gray-400
+              focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none transition
+              ${
+                darkMode
+                  ? "bg-gray-700 border-gray-600 text-gray-200"
+                  : "bg-gray-100 border-gray-300 text-gray-900"
+              }`}
             placeholder="Description"
-            rows={4}
+            rows={5}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
+
           <button
-            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
             onClick={submitTicket}
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-3xl shadow-lg transition transform hover:-translate-y-0.5 active:translate-y-0"
           >
             🚀 Submit Ticket
           </button>
