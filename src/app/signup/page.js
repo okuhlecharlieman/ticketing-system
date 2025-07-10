@@ -1,10 +1,10 @@
-"use client"
-import { useState } from "react";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+"use client";
+import { useState, useEffect } from "react";
+import { createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "../../lib/firebase";
 import { ref, set } from "firebase/database";
 import { useRouter } from "next/navigation";
-import Navbar from "../../components/Navbar"; // Add this import
+import Navbar from "../../components/Navbar";
 
 export default function SignUp() {
   const [email, setEmail] = useState("");
@@ -12,8 +12,19 @@ export default function SignUp() {
   const [name, setName] = useState("");
   const [surname, setSurname] = useState("");
   const [error, setError] = useState("");
-  const [isTechnician, setIsTechnician] = useState("no"); // new state
+  const [isTechnician, setIsTechnician] = useState("no");
   const router = useRouter();
+
+  // Restrict access if the user is logged in
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // Redirect to a different page if already logged in
+        router.push("/"); // Change "/dashboard" to the desired page
+      }
+    });
+    return () => unsubscribe(); // Cleanup the subscription
+  }, [router]);
 
   const handleSignUp = async (e) => {
     e.preventDefault();
@@ -27,7 +38,7 @@ export default function SignUp() {
         email,
         isTechnician: isTechnician === "yes",
       });
-      router.push("/technician");
+      router.push("/technician"); // Redirect after successful signup
     } catch (err) {
       setError(err.message);
     }
@@ -35,7 +46,7 @@ export default function SignUp() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
-      <Navbar /> {/* Add Navbar here */}
+      <Navbar />
       <form onSubmit={handleSignUp} className="bg-white p-8 rounded shadow-md w-full max-w-md">
         <h2 className="text-xl font-bold mb-4 text-blue-600">Sign Up</h2>
         <input
@@ -43,7 +54,7 @@ export default function SignUp() {
           type="text"
           placeholder="Name"
           value={name}
-          onChange={e => setName(e.target.value)}
+          onChange={(e) => setName(e.target.value)}
           required
         />
         <input
@@ -51,7 +62,7 @@ export default function SignUp() {
           type="text"
           placeholder="Surname"
           value={surname}
-          onChange={e => setSurname(e.target.value)}
+          onChange={(e) => setSurname(e.target.value)}
           required
         />
         <input
@@ -59,7 +70,7 @@ export default function SignUp() {
           type="email"
           placeholder="Company Email"
           value={email}
-          onChange={e => setEmail(e.target.value)}
+          onChange={(e) => setEmail(e.target.value)}
           required
         />
         <input
@@ -67,13 +78,13 @@ export default function SignUp() {
           type="password"
           placeholder="Password"
           value={password}
-          onChange={e => setPassword(e.target.value)}
+          onChange={(e) => setPassword(e.target.value)}
           required
         />
         <select
           className="w-full mb-3 px-3 py-2 border rounded"
           value={isTechnician}
-          onChange={e => setIsTechnician(e.target.value)}
+          onChange={(e) => setIsTechnician(e.target.value)}
           required
         >
           <option value="no">Are you a technician?</option>
