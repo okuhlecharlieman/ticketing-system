@@ -1,8 +1,8 @@
 "use client"
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { db } from "../lib/firebase";
-import { ref, push, onValue } from "firebase/database";
+import { db, auth } from "../lib/firebase";
+import { ref, push, onValue, get } from "firebase/database";
 
 const NEWS_API_KEY = process.env.NEXT_PUBLIC_GNEWS_API_KEY;
 
@@ -10,6 +10,8 @@ export default function Home() {
   const [tickets, setTickets] = useState([]);
   const [newTicket, setNewTicket] = useState("");
   const [news, setNews] = useState([]);
+  const [user, setUser] = useState(null);
+  const [isTechnician, setIsTechnician] = useState(false);
 
   // Fetch tickets from Firebase
   useEffect(() => {
@@ -34,6 +36,21 @@ export default function Home() {
       .catch((err) => console.error("Error fetching news:", err));
   }, []);
 
+  // Listen for auth state and get technician status
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
+      setUser(currentUser);
+      if (currentUser) {
+        const userRef = ref(db, "users/" + currentUser.uid);
+        const snapshot = await get(userRef);
+        setIsTechnician(snapshot.val()?.isTechnician || false);
+      } else {
+        setIsTechnician(false);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
   const addTicket = async () => {
     if (!newTicket) return;
     try {
@@ -54,18 +71,28 @@ export default function Home() {
 
       {/* Navigation */}
       <nav className="mb-8 flex gap-4">
-        {/* <Link href="/log-ticket" className="text-blue-600 underline hover:text-blue-800">
-          Log a Ticket
-        </Link>
-        <Link href="/technician" className="text-blue-600 underline hover:text-blue-800">
-          Technician Dashboard
-        </Link> */}
-        <Link href="/signin" className="text-green-600 underline hover:text-green-800">
-          Sign In
-        </Link>
-        <Link href="/signup" className="text-purple-600 underline hover:text-purple-800">
-          Sign Up
-        </Link>
+        {!user && (
+          <>
+            <Link href="/signin" className="text-green-600 underline hover:text-green-800">
+              Sign In
+            </Link>
+            <Link href="/signup" className="text-purple-600 underline hover:text-purple-800">
+              Sign Up
+            </Link>
+          </>
+        )}
+        {user && (
+          <>
+            <Link href="/log-ticket" className="text-blue-600 underline hover:text-blue-800">
+              Log a Ticket
+            </Link>
+            {isTechnician && (
+              <Link href="/technician" className="text-blue-600 underline hover:text-blue-800">
+                Technician Dashboard
+              </Link>
+            )}
+          </>
+        )}
       </nav>
 
       {/* News Section */}
@@ -88,8 +115,6 @@ export default function Home() {
           ))}
         </div>
       </div>
-
-     
     </div>
   );
 }
