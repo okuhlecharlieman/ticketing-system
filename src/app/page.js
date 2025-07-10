@@ -54,12 +54,12 @@ export default function Home() {
 
       {/* Navigation */}
       <nav className="mb-8 flex gap-4">
-        <Link href="/log-ticket" className="text-blue-600 underline hover:text-blue-800">
+        {/* <Link href="/log-ticket" className="text-blue-600 underline hover:text-blue-800">
           Log a Ticket
         </Link>
         <Link href="/technician" className="text-blue-600 underline hover:text-blue-800">
           Technician Dashboard
-        </Link>
+        </Link> */}
         <Link href="/signin" className="text-green-600 underline hover:text-green-800">
           Sign In
         </Link>
