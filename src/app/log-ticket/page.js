@@ -115,14 +115,14 @@ export default function LogTicket() {
       <Navbar />
 
       {/* Theme Toggle */}
-      <div className="flex justify-end px-6 pt-4">
+      {/* <div className="flex justify-end px-6 pt-4">
         <button
           onClick={() => setDarkMode(!darkMode)}
           className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-zinc-700 transition"
         >
           {darkMode ? <Sun size={20} /> : <Moon size={20} />}
         </button>
-      </div>
+      </div> */}
 
       {/* Ticket Form */}
       <div className="flex justify-center items-center py-10">
