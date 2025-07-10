@@ -12,6 +12,7 @@ exports.handler = async (event) => {
     }
 
     sgMail.setApiKey(process.env.SENDGRID_KEY);
+      console.log("Env Key:", process.env.SENDGRID_KEY);
 
     const msg = {
       to: email,
