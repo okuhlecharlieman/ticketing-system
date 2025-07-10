@@ -1,9 +1,9 @@
 "use client"
-import { useState } from "react";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { useState, useEffect } from "react";
+import { signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../lib/firebase";
 import { useRouter } from "next/navigation";
-import Navbar from "../../components/Navbar"; // Add this import
+import Navbar from "../../components/Navbar";
 
 
 export default function SignIn() {
@@ -11,6 +11,16 @@ export default function SignIn() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        router.push("/"); // or "/technician" if you want
+      }
+    });
+    return () => unsubscribe();
+  }, [router]);
 
   const handleSignIn = async (e) => {
     e.preventDefault();
@@ -25,7 +35,7 @@ export default function SignIn() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
-      <Navbar /> {/* Add Navbar here */}
+      <Navbar />
       <form onSubmit={handleSignIn} className="bg-white p-8 rounded shadow-md w-full max-w-md">
         <h2 className="text-xl font-bold mb-4 text-blue-600">Sign In</h2>
         <input
