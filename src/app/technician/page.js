@@ -1,5 +1,6 @@
 "use client";
-import { useEffect, useState } from "react";
+
+import { useEffect, useState, useMemo } from "react";
 import { db, auth } from "../../lib/firebase";
 import { ref, onValue, update, remove, get } from "firebase/database";
 import { useRouter } from "next/navigation";
@@ -10,27 +11,33 @@ export default function Technician() {
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isTechnician, setIsTechnician] = useState(null);
+
+  // Search & filter state
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
+
   const { darkMode, setDarkMode } = useDarkMode();
   const router = useRouter();
 
+  // Auth check + fetch tickets
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (!user) {
         router.push("/signin");
         return;
       }
-
+      
+      // Verify technician role
       const userRef = ref(db, "users/" + user.uid);
-      const snapshot = await get(userRef);
-      const userData = snapshot.val();
-
+      const snap = await get(userRef);
+      const userData = snap.val();
       if (!userData?.isTechnician) {
         router.push("/");
         return;
       }
-
       setIsTechnician(true);
 
+      // Subscribe to tickets
       const ticketsRef = ref(db, "tickets");
       onValue(ticketsRef, (snapshot) => {
         const data = snapshot.val() || {};
@@ -42,6 +49,23 @@ export default function Technician() {
     return () => unsubscribe();
   }, [router]);
 
+  // Derived, filtered ticket list
+  const filteredTickets = useMemo(() => {
+    return tickets.filter(([_, ticket]) => {
+      const term = searchTerm.trim().toLowerCase();
+      const matchesTerm =
+        ticket.title.toLowerCase().includes(term) ||
+        ticket.description.toLowerCase().includes(term) ||
+        (ticket.loggedBy || "").toLowerCase().includes(term);
+
+      const matchesStatus =
+        filterStatus === "all" || ticket.status === filterStatus;
+
+      return matchesTerm && matchesStatus;
+    });
+  }, [tickets, searchTerm, filterStatus]);
+
+  // Actions
   const markResolved = async (id, ticket) => {
     await update(ref(db, `tickets/${id}`), {
       ...ticket,
@@ -78,15 +102,50 @@ export default function Technician() {
           }`}
         >
           <h2
-            className={`text-3xl font-extrabold mb-8 ${
+            className={`text-3xl font-extrabold mb-6 ${
               darkMode ? "text-indigo-300" : "text-indigo-600"
             }`}
           >
             🛠️ Technician Dashboard
           </h2>
 
+          {/* Search & Filter Controls */}
+          <div className="flex flex-wrap gap-4 mb-6">
+            <input
+              type="text"
+              placeholder="🔍 Search tickets…"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className={`flex-grow px-4 py-2 rounded-xl border focus:outline-none transition ${
+                darkMode
+                  ? "bg-gray-700 border-gray-600 text-gray-200 placeholder-gray-400"
+                  : "bg-gray-100 border-gray-300 text-gray-900 placeholder-gray-500"
+              }`}
+            />
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className={`px-4 py-2 rounded-xl border focus:outline-none transition ${
+                darkMode
+                  ? "bg-gray-700 border-gray-600 text-gray-200"
+                  : "bg-gray-100 border-gray-300 text-gray-900"
+              }`}
+            >
+              <option value="all">All Statuses</option>
+              <option value="pending">Pending</option>
+              <option value="resolved">Resolved</option>
+            </select>
+          </div>
+
+          {/* Ticket List */}
           <ul className="space-y-6">
-            {tickets.map(([id, ticket]) => (
+            {filteredTickets.length === 0 && (
+              <li className="text-center text-gray-500">
+                No tickets match your criteria.
+              </li>
+            )}
+
+            {filteredTickets.map(([id, ticket]) => (
               <li
                 key={id}
                 className={`rounded-2xl p-6 shadow-md flex flex-col gap-2 ${
