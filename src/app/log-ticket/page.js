@@ -14,7 +14,8 @@ export default function LogTicket() {
   const [isTech, setIsTech] = useState(false);
   const [allUsers, setAllUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState("");
-const { darkMode, setDarkMode } = useDarkMode();
+  const [isSubmitting, setIsSubmitting] = useState(false);  // 🔥 New state
+  const { darkMode, setDarkMode } = useDarkMode();
   const router = useRouter();
 
   useEffect(() => {
@@ -36,10 +37,10 @@ const { darkMode, setDarkMode } = useDarkMode();
           const allUsersSnapshot = await get(allUsersRef);
           const users = [];
 
-          allUsersSnapshot.forEach((childSnapshot) => {
-            const val = childSnapshot.val();
+          allUsersSnapshot.forEach((child) => {
+            const val = child.val();
             users.push({
-              id: childSnapshot.key,
+              id: child.key,
               name: val.name,
               surname: val.surname,
               email: val.email,
@@ -57,15 +58,19 @@ const { darkMode, setDarkMode } = useDarkMode();
   }, [router]);
 
   const submitTicket = async () => {
+    // Prevent double clicks
+    if (isSubmitting) return;
+
     if (!title || !description) {
       alert("Please fill in all fields.");
       return;
     }
-
     if (!user) {
       alert("You must be logged in to submit a ticket.");
       return;
     }
+
+    setIsSubmitting(true);
 
     try {
       const ticketData = {
@@ -85,16 +90,15 @@ const { darkMode, setDarkMode } = useDarkMode();
 
       await push(ref(db, "tickets"), ticketData);
 
-      const emailPayload = {
-        title,
-        description,
-        email: user.email,
-      };
-
+      // Trigger email function
       const response = await fetch("/.netlify/functions/sendTicketEmail", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(emailPayload),
+        body: JSON.stringify({
+          title,
+          description,
+          email: user.email,
+        }),
       });
 
       if (!response.ok) {
@@ -107,6 +111,8 @@ const { darkMode, setDarkMode } = useDarkMode();
       alert("Ticket submitted!");
     } catch (err) {
       alert("Error submitting ticket: " + err.message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -116,10 +122,8 @@ const { darkMode, setDarkMode } = useDarkMode();
         darkMode ? "bg-gray-900 text-gray-100" : "bg-gray-50 text-gray-900"
       } min-h-screen transition-colors duration-500`}
     >
-      {/* Pass darkMode and setDarkMode to Navbar */}
       <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
 
-      {/* Ticket Form */}
       <div className="flex justify-center items-center py-12 px-4 sm:px-6 lg:px-8">
         <div
           className={`w-full max-w-lg rounded-3xl shadow-xl p-10 ${
@@ -155,9 +159,9 @@ const { darkMode, setDarkMode } = useDarkMode();
                 onChange={(e) => setSelectedUser(e.target.value)}
               >
                 <option value="">Select a User</option>
-                {allUsers.map((user) => (
-                  <option key={user.id} value={user.id}>
-                    {user.name} {user.surname} ({user.email})
+                {allUsers.map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.name} {u.surname} ({u.email})
                   </option>
                 ))}
               </select>
@@ -177,6 +181,7 @@ const { darkMode, setDarkMode } = useDarkMode();
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
+
           <textarea
             className={`w-full mb-6 px-5 py-3 rounded-2xl border placeholder-gray-400
               focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none transition
@@ -193,9 +198,15 @@ const { darkMode, setDarkMode } = useDarkMode();
 
           <button
             onClick={submitTicket}
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-3xl shadow-lg transition transform hover:-translate-y-0.5 active:translate-y-0"
+            disabled={isSubmitting}
+            className={`w-full font-semibold py-3 rounded-3xl shadow-lg transition transform 
+              ${
+                isSubmitting
+                  ? "bg-indigo-400 cursor-not-allowed"
+                  : "bg-indigo-600 hover:bg-indigo-700 hover:-translate-y-0.5 active:translate-y-0"
+              } text-white`}
           >
-            🚀 Submit Ticket
+            {isSubmitting ? "Submitting…" : "🚀 Submit Ticket"}
           </button>
         </div>
       </div>
