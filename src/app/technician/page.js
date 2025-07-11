@@ -10,7 +10,7 @@ export default function Technician() {
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isTechnician, setIsTechnician] = useState(null);
-  const { darkMode } = useDarkMode();
+  const { darkMode, setDarkMode } = useDarkMode();
   const router = useRouter();
 
   useEffect(() => {

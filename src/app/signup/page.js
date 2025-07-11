@@ -14,7 +14,7 @@ export default function SignUp() {
   const [surname, setSurname] = useState("");
   const [isTechnician, setIsTechnician] = useState("no");
   const [error, setError] = useState("");
-  const { darkMode } = useDarkMode();
+  const { darkMode, setDarkMode } = useDarkMode();
   const router = useRouter();
 
   useEffect(() => {
