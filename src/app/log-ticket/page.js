@@ -14,7 +14,7 @@ export default function LogTicket() {
   const [isTech, setIsTech] = useState(false);
   const [allUsers, setAllUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState("");
-const { darkMode } = useDarkMode();
+const { darkMode, setDarkMode } = useDarkMode();
   const router = useRouter();
 
   useEffect(() => {
