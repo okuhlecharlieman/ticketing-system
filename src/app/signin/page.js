@@ -4,12 +4,13 @@ import { signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../lib/firebase";
 import { useRouter } from "next/navigation";
 import Navbar from "../../components/Navbar";
+import { useDarkMode } from "../../context/DarkModeContext";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [darkMode, setDarkMode] = useState(false);
+  const { darkMode } = useDarkMode();
   const router = useRouter();
 
   useEffect(() => {

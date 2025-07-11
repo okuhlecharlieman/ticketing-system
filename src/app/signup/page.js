@@ -5,6 +5,7 @@ import { auth, db } from "../../lib/firebase";
 import { ref, set } from "firebase/database";
 import { useRouter } from "next/navigation";
 import Navbar from "../../components/Navbar";
+import { useDarkMode } from "../../context/DarkModeContext";
 
 export default function SignUp() {
   const [email, setEmail] = useState("");
@@ -13,7 +14,7 @@ export default function SignUp() {
   const [surname, setSurname] = useState("");
   const [isTechnician, setIsTechnician] = useState("no");
   const [error, setError] = useState("");
-  const [darkMode, setDarkMode] = useState(false);
+  const { darkMode } = useDarkMode();
   const router = useRouter();
 
   useEffect(() => {

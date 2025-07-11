@@ -5,6 +5,7 @@ import { ref, push, get } from "firebase/database";
 import { onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import Navbar from "../../components/Navbar";
+import { useDarkMode } from "../../context/DarkModeContext";
 
 export default function LogTicket() {
   const [title, setTitle] = useState("");
@@ -13,7 +14,7 @@ export default function LogTicket() {
   const [isTech, setIsTech] = useState(false);
   const [allUsers, setAllUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState("");
-  const [darkMode, setDarkMode] = useState(false);
+const { darkMode } = useDarkMode();
   const router = useRouter();
 
   useEffect(() => {

@@ -4,12 +4,13 @@ import { db, auth } from "../../lib/firebase";
 import { ref, onValue, update, remove, get } from "firebase/database";
 import { useRouter } from "next/navigation";
 import Navbar from "../../components/Navbar";
+import { useDarkMode } from "../../context/DarkModeContext";
 
 export default function Technician() {
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isTechnician, setIsTechnician] = useState(null);
-  const [darkMode, setDarkMode] = useState(false);
+  const { darkMode } = useDarkMode();
   const router = useRouter();
 
   useEffect(() => {
