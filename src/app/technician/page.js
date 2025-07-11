@@ -26,7 +26,7 @@ export default function Technician() {
         router.push("/signin");
         return;
       }
-      
+
       // Verify technician role
       const userRef = ref(db, "users/" + user.uid);
       const snap = await get(userRef);
@@ -79,6 +79,54 @@ export default function Technician() {
     }
   };
 
+  // Pull Reports: generates CSV of all current tickets
+  const pullReports = () => {
+    if (tickets.length === 0) {
+      alert("No tickets to report.");
+      return;
+    }
+
+    const headers = [
+      "ID",
+      "Title",
+      "Description",
+      "Status",
+      "Logged By",
+      "Logged At",
+    ];
+    const rows = tickets.map(([id, ticket]) => [
+      id,
+      ticket.title,
+      ticket.description,
+      ticket.status,
+      ticket.loggedBy || "",
+      ticket.createdAt ||
+        (ticket.created ? new Date(ticket.created).toLocaleString() : ""),
+    ]);
+
+    const csvContent = [headers, ...rows]
+      .map((row) =>
+        row
+          .map((cell) => `"${String(cell).replace(/"/g, '""')}"`)
+          .join(",")
+      )
+      .join("\n");
+
+    const blob = new Blob([csvContent], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute(
+      "download",
+      `tickets_report_${new Date().toISOString()}.csv`
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   if (loading || isTechnician === null) {
     return (
       <div className="flex items-center justify-center h-screen text-xl text-gray-500">
@@ -109,8 +157,8 @@ export default function Technician() {
             🛠️ Technician Dashboard
           </h2>
 
-          {/* Search & Filter Controls */}
-          <div className="flex flex-wrap gap-4 mb-6">
+          {/* Search, Filter & Reports Controls */}
+          <div className="flex flex-wrap gap-4 mb-6 items-center">
             <input
               type="text"
               placeholder="🔍 Search tickets…"
@@ -132,9 +180,19 @@ export default function Technician() {
               }`}
             >
               <option value="all">All Statuses</option>
-              <option value="pending">Pending</option>
+              <option value="open">Open</option>
               <option value="resolved">Resolved</option>
             </select>
+            <button
+              onClick={pullReports}
+              className={`px-4 py-2 rounded-xl text-sm font-semibold transition ${
+                darkMode
+                  ? "bg-indigo-500 hover:bg-indigo-600 text-white"
+                  : "bg-indigo-600 hover:bg-indigo-700 text-white"
+              }`}
+            >
+              📥 Pull Reports
+            </button>
           </div>
 
           {/* Ticket List */}
