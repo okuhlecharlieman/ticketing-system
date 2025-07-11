@@ -1,5 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { DarkModeProvider } from '../context/DarkModeContext';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
