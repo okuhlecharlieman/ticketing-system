@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../lib/firebase";
 import { useRouter } from "next/navigation";
-import { Moon, Sun } from "lucide-react";
 import Navbar from "../../components/Navbar";
 
 export default function SignIn() {
@@ -13,12 +12,9 @@ export default function SignIn() {
   const [darkMode, setDarkMode] = useState(false);
   const router = useRouter();
 
-  // Redirect if already logged in
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        router.push("/");
-      }
+      if (user) router.push("/");
     });
     return () => unsubscribe();
   }, [router]);
@@ -35,62 +31,54 @@ export default function SignIn() {
   };
 
   return (
-    <div className={`${darkMode ? "bg-zinc-900 text-white" : "bg-blue-50 text-gray-900"} min-h-screen transition-colors duration-500`}>
-      <Navbar />
+    <div className={`${darkMode ? "bg-gray-900 text-gray-100" : "bg-gray-50 text-gray-900"} min-h-screen transition-colors duration-500`}>
+      <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
 
-      {/* Theme Toggle */}
-      <div className="flex justify-end px-6 pt-4">
-        <button
-          onClick={() => setDarkMode(!darkMode)}
-          className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-zinc-700 transition"
-        >
-          {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-        </button>
-      </div>
-
-      {/* Sign In Form */}
-      <div className="flex justify-center items-center py-10">
-        <form
-          onSubmit={handleSignIn}
-          className="bg-white dark:bg-zinc-800 p-8 rounded-2xl shadow-lg w-full max-w-md"
-        >
-          <h2 className="text-2xl font-bold mb-6 text-blue-600 dark:text-blue-300 text-center">
+      <div className="flex justify-center items-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className={`w-full max-w-lg rounded-3xl shadow-xl p-10 ${darkMode ? "bg-gray-800" : "bg-white"}`}>
+          <h2 className={`text-3xl font-extrabold mb-8 text-center ${darkMode ? "text-indigo-300" : "text-indigo-600"}`}>
             🔐 Sign In
           </h2>
 
-          <input
-            className="w-full mb-3 px-4 py-2 border rounded dark:bg-zinc-700 dark:text-white"
-            type="email"
-            placeholder="Company Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <input
-            className="w-full mb-3 px-4 py-2 border rounded dark:bg-zinc-700 dark:text-white"
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+          <form onSubmit={handleSignIn}>
+            <input
+              type="email"
+              className={`w-full mb-5 px-5 py-3 rounded-2xl border placeholder-gray-400
+                focus:outline-none focus:ring-2 focus:ring-indigo-400 transition
+                ${darkMode ? "bg-gray-700 border-gray-600 text-gray-200" : "bg-gray-100 border-gray-300 text-gray-900"}`}
+              placeholder="Company Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+            <input
+              type="password"
+              className={`w-full mb-6 px-5 py-3 rounded-2xl border placeholder-gray-400
+                focus:outline-none focus:ring-2 focus:ring-indigo-400 transition
+                ${darkMode ? "bg-gray-700 border-gray-600 text-gray-200" : "bg-gray-100 border-gray-300 text-gray-900"}`}
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
 
-          {error && <div className="text-red-500 text-sm mb-3">{error}</div>}
+            {error && <div className="text-red-500 text-sm mb-4">{error}</div>}
 
-          <button
-            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
-            type="submit"
-          >
-            Sign In
-          </button>
+            <button
+              type="submit"
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-3xl shadow-lg transition transform hover:-translate-y-0.5 active:translate-y-0"
+            >
+              🔓 Sign In
+            </button>
+          </form>
 
-          <div className="mt-4 text-sm text-center dark:text-gray-300">
+          <p className="mt-6 text-sm text-center text-gray-500 dark:text-gray-400">
             Don&apos;t have an account?{" "}
-            <a href="/signup" className="text-blue-600 underline dark:text-blue-400">
+            <a href="/signup" className="text-indigo-600 dark:text-indigo-400 underline">
               Sign Up
             </a>
-          </div>
-        </form>
+          </p>
+        </div>
       </div>
     </div>
   );
