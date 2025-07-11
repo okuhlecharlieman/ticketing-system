@@ -10,7 +10,7 @@ export default function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const { darkMode } = useDarkMode();
+ const { darkMode, setDarkMode } = useDarkMode();
   const router = useRouter();
 
   useEffect(() => {
