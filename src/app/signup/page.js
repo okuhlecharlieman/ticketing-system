@@ -4,7 +4,6 @@ import { createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/aut
 import { auth, db } from "../../lib/firebase";
 import { ref, set } from "firebase/database";
 import { useRouter } from "next/navigation";
-import { Moon, Sun } from "lucide-react";
 import Navbar from "../../components/Navbar";
 
 export default function SignUp() {
@@ -12,8 +11,8 @@ export default function SignUp() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [surname, setSurname] = useState("");
-  const [error, setError] = useState("");
   const [isTechnician, setIsTechnician] = useState("no");
+  const [error, setError] = useState("");
   const [darkMode, setDarkMode] = useState(false);
   const router = useRouter();
 
@@ -42,78 +41,86 @@ export default function SignUp() {
   };
 
   return (
-    <div className={`${darkMode ? "bg-zinc-900 text-white" : "bg-blue-50 text-gray-900"} min-h-screen transition-colors duration-500`}>
-      <div className="flex justify-between items-center px-6 py-4 shadow-md sticky top-0 bg-opacity-90 backdrop-blur-md z-10">
-        <h1 className="text-2xl font-bold text-blue-600 dark:text-blue-300">🎫 Tickitie</h1>
-        <button onClick={() => setDarkMode(!darkMode)} className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-zinc-700 transition">
-          {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-        </button>
-      </div>
+    <div className={`${darkMode ? "bg-gray-900 text-gray-100" : "bg-gray-50 text-gray-900"} min-h-screen transition-colors duration-500`}>
+      <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
+      <div className="flex justify-center items-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className={`w-full max-w-lg rounded-3xl shadow-xl p-10 ${darkMode ? "bg-gray-800" : "bg-white"}`}>
+          <h2 className={`text-3xl font-extrabold mb-8 ${darkMode ? "text-indigo-300" : "text-indigo-600"}`}>
+            🧾 Create an Account
+          </h2>
 
-      <main className="flex flex-col items-center justify-center px-4 py-12">
-        <form onSubmit={handleSignUp} className="bg-white dark:bg-zinc-800 shadow-md rounded-xl p-8 w-full max-w-md">
-          <h2 className="text-2xl font-bold mb-6 text-center text-blue-600 dark:text-blue-300">Create an Account</h2>
+          <form onSubmit={handleSignUp}>
+            <input
+              type="text"
+              className={`w-full mb-5 px-5 py-3 rounded-2xl border placeholder-gray-400
+                focus:outline-none focus:ring-2 focus:ring-indigo-400 transition
+                ${darkMode ? "bg-gray-700 border-gray-600 text-gray-200" : "bg-gray-100 border-gray-300 text-gray-900"}`}
+              placeholder="Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+            <input
+              type="text"
+              className={`w-full mb-5 px-5 py-3 rounded-2xl border placeholder-gray-400
+                focus:outline-none focus:ring-2 focus:ring-indigo-400 transition
+                ${darkMode ? "bg-gray-700 border-gray-600 text-gray-200" : "bg-gray-100 border-gray-300 text-gray-900"}`}
+              placeholder="Surname"
+              value={surname}
+              onChange={(e) => setSurname(e.target.value)}
+              required
+            />
+            <input
+              type="email"
+              className={`w-full mb-5 px-5 py-3 rounded-2xl border placeholder-gray-400
+                focus:outline-none focus:ring-2 focus:ring-indigo-400 transition
+                ${darkMode ? "bg-gray-700 border-gray-600 text-gray-200" : "bg-gray-100 border-gray-300 text-gray-900"}`}
+              placeholder="Company Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+            <input
+              type="password"
+              className={`w-full mb-5 px-5 py-3 rounded-2xl border placeholder-gray-400
+                focus:outline-none focus:ring-2 focus:ring-indigo-400 transition
+                ${darkMode ? "bg-gray-700 border-gray-600 text-gray-200" : "bg-gray-100 border-gray-300 text-gray-900"}`}
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <select
+              className={`w-full mb-6 px-5 py-3 rounded-2xl border focus:outline-none focus:ring-2
+                focus:ring-indigo-400 transition
+                ${darkMode ? "bg-gray-700 border-gray-600 text-gray-200" : "bg-gray-100 border-gray-300 text-gray-900"}`}
+              value={isTechnician}
+              onChange={(e) => setIsTechnician(e.target.value)}
+              required
+            >
+              <option value="no">Are you a technician?</option>
+              <option value="yes">Yes</option>
+              <option value="no">No</option>
+            </select>
 
-          <input
-            className="w-full mb-4 px-4 py-2 rounded-lg border dark:border-zinc-600 bg-white dark:bg-zinc-900 dark:text-white"
-            type="text"
-            placeholder="Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
-          <input
-            className="w-full mb-4 px-4 py-2 rounded-lg border dark:border-zinc-600 bg-white dark:bg-zinc-900 dark:text-white"
-            type="text"
-            placeholder="Surname"
-            value={surname}
-            onChange={(e) => setSurname(e.target.value)}
-            required
-          />
-          <input
-            className="w-full mb-4 px-4 py-2 rounded-lg border dark:border-zinc-600 bg-white dark:bg-zinc-900 dark:text-white"
-            type="email"
-            placeholder="Company Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <input
-            className="w-full mb-4 px-4 py-2 rounded-lg border dark:border-zinc-600 bg-white dark:bg-zinc-900 dark:text-white"
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          <select
-            className="w-full mb-4 px-4 py-2 rounded-lg border dark:border-zinc-600 bg-white dark:bg-zinc-900 dark:text-white"
-            value={isTechnician}
-            onChange={(e) => setIsTechnician(e.target.value)}
-            required
-          >
-            <option value="no">Are you a technician?</option>
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
-          </select>
+            {error && <div className="text-red-500 text-sm mb-4">{error}</div>}
 
-          {error && <div className="text-red-500 text-sm mb-4">{error}</div>}
+            <button
+              type="submit"
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-3xl shadow-lg transition transform hover:-translate-y-0.5 active:translate-y-0"
+            >
+              ✅ Sign Up
+            </button>
+          </form>
 
-          <button
-            className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
-            type="submit"
-          >
-            Sign Up
-          </button>
-
-          <p className="mt-4 text-sm text-center text-gray-700 dark:text-gray-300">
+          <p className="mt-6 text-sm text-center text-gray-500 dark:text-gray-400">
             Already have an account?{" "}
-            <a href="/signin" className="text-blue-600 underline dark:text-blue-400">
+            <a href="/signin" className="text-indigo-600 dark:text-indigo-400 underline">
               Sign In
             </a>
           </p>
-        </form>
-      </main>
+        </div>
+      </div>
     </div>
   );
 }
