@@ -80,7 +80,7 @@ export default function Technician() {
   };
 
   // Pull Reports: generates CSV of all current tickets
-  const pullReports = () => {
+const pullReports = () => {
   if (tickets.length === 0) {
     alert("No tickets to report.");
     return;
@@ -92,27 +92,31 @@ export default function Technician() {
     "Description",
     "Status",
     "Logged By",
-    "Logged Date/Time",
+    "Logged At",
+    "Logged For",
+    "Is Technician Logged",
   ];
 
   const rows = tickets.map(([id, ticket]) => {
-    const formatField = (value) =>
-      `"${String(value || "")
+    const clean = (val) =>
+      `"${String(val || "")
         .replace(/"/g, '""')
-        .replace(/\r?\n|\r/g, " ")}"`; // Escape quotes + remove newlines
+        .replace(/\r?\n|\r/g, " ")}"`; // escape quotes & newlines
 
     return [
-      formatField(id),
-      formatField(ticket.title),
-      formatField(ticket.description),
-      formatField(ticket.status),
-      formatField(ticket.loggedBy || "N/A"),
-      formatField(
+      clean(id),
+      clean(ticket.title),
+      clean(ticket.description),
+      clean(ticket.status),
+      clean(ticket.loggedBy || "N/A"),
+      clean(
         ticket.createdAt ||
           (ticket.created
             ? new Date(ticket.created).toLocaleString()
             : "N/A")
       ),
+      clean(ticket.loggedFor || "N/A"),
+      clean(ticket.isLoggedByTech ? "Yes" : "No"),
     ].join(",");
   });
 
@@ -133,6 +137,7 @@ export default function Technician() {
   link.click();
   document.body.removeChild(link);
 };
+
 
 
   if (loading || isTechnician === null) {
