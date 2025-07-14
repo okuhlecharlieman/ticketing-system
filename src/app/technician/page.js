@@ -81,51 +81,59 @@ export default function Technician() {
 
   // Pull Reports: generates CSV of all current tickets
   const pullReports = () => {
-    if (tickets.length === 0) {
-      alert("No tickets to report.");
-      return;
-    }
+  if (tickets.length === 0) {
+    alert("No tickets to report.");
+    return;
+  }
 
-    const headers = [
-      "ID",
-      "Title",
-      "Description",
-      "Status",
-      "Logged By",
-      "Logged At",
-    ];
-    const rows = tickets.map(([id, ticket]) => [
-      id,
-      ticket.title,
-      ticket.description,
-      ticket.status,
-      ticket.loggedBy || "",
-      ticket.createdAt ||
-        (ticket.created ? new Date(ticket.created).toLocaleString() : ""),
-    ]);
+  const headers = [
+    "Ticket ID",
+    "Title",
+    "Description",
+    "Status",
+    "Logged By",
+    "Logged Date/Time",
+  ];
 
-    const csvContent = [headers, ...rows]
-      .map((row) =>
-        row
-          .map((cell) => `"${String(cell).replace(/"/g, '""')}"`)
-          .join(",")
-      )
-      .join("\n");
+  const rows = tickets.map(([id, ticket]) => {
+    const formatField = (value) =>
+      `"${String(value || "")
+        .replace(/"/g, '""')
+        .replace(/\r?\n|\r/g, " ")}"`; // Escape quotes + remove newlines
 
-    const blob = new Blob([csvContent], {
-      type: "text/csv;charset=utf-8;",
-    });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute(
-      "download",
-      `tickets_report_${new Date().toISOString()}.csv`
-    );
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
+    return [
+      formatField(id),
+      formatField(ticket.title),
+      formatField(ticket.description),
+      formatField(ticket.status),
+      formatField(ticket.loggedBy || "N/A"),
+      formatField(
+        ticket.createdAt ||
+          (ticket.created
+            ? new Date(ticket.created).toLocaleString()
+            : "N/A")
+      ),
+    ].join(",");
+  });
+
+  const csvContent = [headers.join(","), ...rows].join("\n");
+
+  const blob = new Blob([csvContent], {
+    type: "text/csv;charset=utf-8;",
+  });
+
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.setAttribute(
+    "download",
+    `tickets_report_${new Date().toISOString().slice(0, 10)}.csv`
+  );
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
 
   if (loading || isTechnician === null) {
     return (
