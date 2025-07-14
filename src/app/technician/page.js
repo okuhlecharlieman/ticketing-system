@@ -97,30 +97,30 @@ const pullReports = () => {
     "Is Technician Logged",
   ];
 
-  const rows = tickets.map(([id, ticket]) => {
-    const clean = (val) =>
-      `"${String(val || "")
-        .replace(/"/g, '""')
-        .replace(/\r?\n|\r/g, " ")}"`; // escape quotes & newlines
+  const formatValue = (val) => {
+    const clean = String(val || "")
+      .replace(/\r?\n|\r/g, " ") // remove newlines
+      .replace(/;/g, ","); // avoid breaking CSV
+    return clean.includes(" ") ? `"${clean}"` : clean;
+  };
 
-    return [
-      clean(id),
-      clean(ticket.title),
-      clean(ticket.description),
-      clean(ticket.status),
-      clean(ticket.loggedBy || "N/A"),
-      clean(
-        ticket.createdAt ||
-          (ticket.created
-            ? new Date(ticket.created).toLocaleString()
-            : "N/A")
-      ),
-      clean(ticket.loggedFor || "N/A"),
-      clean(ticket.isLoggedByTech ? "Yes" : "No"),
-    ].join(",");
-  });
+  const rows = tickets.map(([id, ticket]) => [
+    formatValue(id),
+    formatValue(ticket.title),
+    formatValue(ticket.description),
+    formatValue(ticket.status),
+    formatValue(ticket.loggedBy || "N/A"),
+    formatValue(
+      ticket.createdAt ||
+        (ticket.created
+          ? new Date(ticket.created).toLocaleString()
+          : "N/A")
+    ),
+    formatValue(ticket.loggedFor || "N/A"),
+    formatValue(ticket.isLoggedByTech ? "Yes" : "No"),
+  ]);
 
-  const csvContent = [headers.join(","), ...rows].join("\n");
+  const csvContent = [headers.join(";"), ...rows.map((r) => r.join(";"))].join("\n");
 
   const blob = new Blob([csvContent], {
     type: "text/csv;charset=utf-8;",
@@ -137,6 +137,7 @@ const pullReports = () => {
   link.click();
   document.body.removeChild(link);
 };
+
 
 
 
