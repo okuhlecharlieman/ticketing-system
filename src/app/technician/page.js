@@ -81,8 +81,8 @@ export default function Technician() {
 
   // Pull Reports: generates CSV of all current tickets
 const pullReports = () => {
-  if (tickets.length === 0) {
-    alert("No tickets to report.");
+  if (filteredTickets.length === 0) {
+    alert("No tickets to report based on your filter.");
     return;
   }
 
@@ -100,11 +100,11 @@ const pullReports = () => {
   const formatValue = (val) => {
     const clean = String(val || "")
       .replace(/\r?\n|\r/g, " ") // remove newlines
-      .replace(/;/g, ","); // avoid breaking CSV
+      .replace(/;/g, ","); // replace ; to prevent column break
     return clean.includes(" ") ? `"${clean}"` : clean;
   };
 
-  const rows = tickets.map(([id, ticket]) => [
+  const rows = filteredTickets.map(([id, ticket]) => [
     formatValue(id),
     formatValue(ticket.title),
     formatValue(ticket.description),
@@ -131,12 +131,13 @@ const pullReports = () => {
   link.href = url;
   link.setAttribute(
     "download",
-    `tickets_report_${new Date().toISOString().slice(0, 10)}.csv`
+    `filtered_tickets_${new Date().toISOString().slice(0, 10)}.csv`
   );
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
 };
+
 
 
 
