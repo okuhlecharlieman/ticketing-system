@@ -58,14 +58,13 @@ export default function Navbar() {
               Log Ticket
             </Link>
 
-            {!isTechnician && (
               <Link
                 href="/my-tickets"
                 className="hover:underline hover:text-blue-500"
               >
                 My Tickets
               </Link>
-            )}
+            
           </>
         )}
 
