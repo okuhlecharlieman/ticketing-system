@@ -5,15 +5,21 @@ import { ref, onValue } from "firebase/database";
 import { auth, db } from "../../lib/firebase";
 import Navbar from "../../components/Navbar";
 import { useDarkMode } from "../../context/DarkModeContext";
+import { useRouter } from "next/navigation";
 
 export default function MyTickets() {
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const { darkMode, setDarkMode } = useDarkMode();
+  const router = useRouter();
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (!user) return;
+      if (!user) {
+        // Redirect unauthenticated users to login page or homepage
+        router.replace("/signin"); // Change to your login page route
+        return;
+      }
       const ticketsRef = ref(db, "tickets");
       onValue(ticketsRef, (snapshot) => {
         const data = snapshot.val() || {};
@@ -25,7 +31,7 @@ export default function MyTickets() {
       });
     });
     return () => unsubscribe();
-  }, []);
+  }, [router]);
 
   if (loading) {
     return (
