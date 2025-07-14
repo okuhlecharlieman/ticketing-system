@@ -50,12 +50,23 @@ export default function Navbar() {
 
       <div className="flex items-center gap-4 text-sm">
         {user && (
-          <Link
-            href="/log-ticket"
-            className="hover:underline hover:text-blue-500"
-          >
-            Log Ticket
-          </Link>
+          <>
+            <Link
+              href="/log-ticket"
+              className="hover:underline hover:text-blue-500"
+            >
+              Log Ticket
+            </Link>
+
+            {!isTechnician && (
+              <Link
+                href="/my-tickets"
+                className="hover:underline hover:text-blue-500"
+              >
+                My Tickets
+              </Link>
+            )}
+          </>
         )}
 
         {isTechnician && (
