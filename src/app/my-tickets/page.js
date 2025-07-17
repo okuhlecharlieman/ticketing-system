@@ -11,32 +11,73 @@ export default function MyTickets() {
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState(null);
+  const [allUsers, setAllUsers] = useState({});
+  const [isTechnician, setIsTechnician] = useState(false);
+  const [filterUser, setFilterUser] = useState(""); // selected user filter for tech
   const { darkMode, setDarkMode } = useDarkMode();
   const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (!user) {
         router.replace("/signin");
         return;
       }
       setCurrentUser(user);
 
+      // Check if user is tech
+      const userRef = ref(db, "users/" + user.uid);
+      const snap = await get(userRef);
+      const userData = snap.val();
+      const techStatus = userData?.isTechnician || false;
+      setIsTechnician(techStatus);
+
+      if (techStatus) {
+        // fetch all users for dropdown
+        const usersRef = ref(db, "users");
+        const usersSnap = await get(usersRef);
+        setAllUsers(usersSnap.val() || {});
+      }
+
+      // Subscribe tickets
       const ticketsRef = ref(db, "tickets");
       onValue(ticketsRef, (snapshot) => {
         const data = snapshot.val() || {};
-        // Filter tickets where loggedByUid or loggedFor equals currentUser.uid
-        const userTickets = Object.entries(data).filter(([_, ticket]) => {
-          return (
-            ticket.loggedByUid === user.uid || ticket.loggedFor === user.uid
-          );
-        });
-        setTickets(userTickets);
+        setTickets(Object.entries(data));
         setLoading(false);
       });
     });
+
     return () => unsubscribe();
   }, [router]);
+
+  // Filter tickets by user for non-tech, and for tech by filterUser or all
+  const filteredTickets = tickets.filter(([_, ticket]) => {
+    if (!currentUser) return false;
+
+    // For user: ticket where loggedByUid or loggedFor === currentUser.uid
+    if (!isTechnician) {
+      return (
+        ticket.loggedByUid === currentUser.uid ||
+        ticket.loggedFor === currentUser.uid
+      );
+    }
+
+    // For tech with filter selected: tickets loggedByUid or loggedFor equals filterUser UID
+    if (filterUser) {
+      return ticket.loggedByUid === filterUser || ticket.loggedFor === filterUser;
+    }
+
+    // For tech no filter: show all tickets
+    return true;
+  });
+
+  // Helper: display user name + email for filter dropdown
+  const getUserDisplay = (uid) => {
+    if (!uid || !allUsers[uid]) return "Unknown User";
+    const u = allUsers[uid];
+    return `${u.name} ${u.surname} (${u.email})`;
+  };
 
   if (loading) {
     return (
@@ -59,15 +100,47 @@ export default function MyTickets() {
       <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
 
       <main className="max-w-4xl mx-auto p-6">
-        <h1
-          className={`text-3xl font-extrabold mb-8 ${
-            darkMode ? "text-red-300" : "text-red-600"
-          }`}
-        >
-          🎟️ My Tickets
-        </h1>
+        <div className="flex items-center justify-between mb-8">
+          <h1
+            className={`text-3xl font-extrabold ${
+              darkMode ? "text-red-300" : "text-red-600"
+            }`}
+          >
+            🎟️ My Tickets ({filteredTickets.length})
+          </h1>
 
-        {tickets.length === 0 ? (
+          {isTechnician && (
+            <div className="flex items-center gap-2">
+              <label
+                htmlFor="userFilter"
+                className={`font-semibold ${
+                  darkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
+                Filter by user:
+              </label>
+              <select
+                id="userFilter"
+                value={filterUser}
+                onChange={(e) => setFilterUser(e.target.value)}
+                className={`px-3 py-2 rounded border ${
+                  darkMode
+                    ? "bg-gray-700 border-gray-600 text-gray-200"
+                    : "bg-gray-100 border-gray-300 text-gray-900"
+                }`}
+              >
+                <option value="">All Users</option>
+                {Object.entries(allUsers).map(([uid, user]) => (
+                  <option key={uid} value={uid}>
+                    {user.name} {user.surname} ({user.email})
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
+
+        {filteredTickets.length === 0 ? (
           <p
             className={`text-center italic ${
               darkMode ? "text-gray-400" : "text-gray-600"
@@ -77,7 +150,7 @@ export default function MyTickets() {
           </p>
         ) : (
           <ul className="space-y-8">
-            {tickets.map(([id, ticket]) => (
+            {filteredTickets.map(([id, ticket]) => (
               <li
                 key={id}
                 className={`rounded-3xl p-6 shadow-xl flex flex-col gap-4 ${
@@ -101,6 +174,18 @@ export default function MyTickets() {
                     {ticket.createdAt ||
                       new Date(ticket.created).toLocaleString()}
                   </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Logged by: {ticket.loggedBy || "Unknown"}
+                  </p>
+                  {ticket.isLoggedByTech && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      Logged for: {ticket.loggedFor
+                        ? allUsers[ticket.loggedFor]
+                          ? getUserDisplay(ticket.loggedFor)
+                          : ticket.loggedFor
+                        : "N/A"}
+                    </p>
+                  )}
                 </div>
 
                 <div className="mt-4">
@@ -117,7 +202,7 @@ export default function MyTickets() {
                           }`}
                         >
                           <span className="font-bold text-indigo-400">
-                            {comment.author /* changed from comment.user */}
+                            {comment.author}
                           </span>
                           : {comment.text}
                         </li>
