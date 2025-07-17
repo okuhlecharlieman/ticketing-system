@@ -63,10 +63,11 @@ export default function MyTickets() {
       );
     }
 
-    // For tech with filter selected: tickets loggedByUid or loggedFor equals filterUser UID
-    if (filterUser) {
-      return ticket.loggedByUid === filterUser || ticket.loggedFor === filterUser;
-    }
+  
+   if (filterUser) {
+  // Only show tickets where selected user is the recipient (loggedFor)
+  return ticket.loggedFor === filterUser;
+}
 
     // For tech no filter: show all tickets
     return true;
