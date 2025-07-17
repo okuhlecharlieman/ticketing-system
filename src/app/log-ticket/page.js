@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { db, auth } from "../lib/firebase";
+import { db, auth } from "../../lib/firebase";
 import { ref, push, onValue, get } from "firebase/database";
 import { Moon, Sun } from "lucide-react";
 
