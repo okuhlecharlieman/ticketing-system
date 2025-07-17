@@ -95,20 +95,21 @@ export default function LogTicket() {
     setIsSubmitting(true);
 
     try {
-      const ticketData = {
-        title: title.trim(),
-        description: description.trim(),
-        status: "open",
-        created: Date.now(),
-        createdAt: new Date().toLocaleString(),
-        loggedBy: user.email,
-        loggedByUid: user.uid,
-      };
+    const ticketData = {
+  title: title.trim(),
+  description: description.trim(),
+  status: "open",
+  created: Date.now(),
+  createdAt: new Date().toLocaleString(),
+  loggedBy: user.email,
+  loggedByUid: user.uid,
+  loggedFor: isTech && selectedUser ? selectedUser : user.uid, // always set loggedFor
+};
 
-      if (isTech && selectedUser) {
-        ticketData.loggedFor = selectedUser;
-        ticketData.isLoggedByTech = true;
-      }
+if (isTech && selectedUser) {
+  ticketData.isLoggedByTech = true;
+}
+
 
       await push(ref(db, "tickets"), ticketData);
 
@@ -120,6 +121,10 @@ export default function LogTicket() {
 
       if (!response.ok) {
         setMessage("⚠️ Email notification failed.");
+           // Reset form only on success
+        setTitle("");
+        setDescription("");
+        setSelectedUser("");
       } else {
         setMessage("✅ Ticket submitted successfully!");
         // Reset form only on success
