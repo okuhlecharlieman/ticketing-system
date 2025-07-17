@@ -6,7 +6,6 @@ import { onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import Navbar from "../../components/Navbar";
 import { useDarkMode } from "../../context/DarkModeContext";
-import { Ticket, Send, Users, AlertCircle, CheckCircle } from "lucide-react";
 
 export default function LogTicket() {
   const [title, setTitle] = useState("");
@@ -15,9 +14,8 @@ export default function LogTicket() {
   const [isTech, setIsTech] = useState(false);
   const [allUsers, setAllUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [message, setMessage] = useState(null);
-  const [messageType, setMessageType] = useState("success"); // success, error, warning
+  const [isSubmitting, setIsSubmitting] = useState(false); // 🔥 New state
+  const [message, setMessage] = useState(null); // For pop-up messages
   const { darkMode, setDarkMode } = useDarkMode();
   const router = useRouter();
 
@@ -61,16 +59,15 @@ export default function LogTicket() {
   }, [router]);
 
   const submitTicket = async () => {
+    // Prevent double clicks
     if (isSubmitting) return;
 
     if (!title || !description) {
-      setMessage("Please fill in all required fields.");
-      setMessageType("error");
+      setMessage("Please fill in all fields.");
       return;
     }
     if (!user) {
       setMessage("You must be logged in to submit a ticket.");
-      setMessageType("error");
       return;
     }
 
@@ -106,11 +103,9 @@ export default function LogTicket() {
       });
 
       if (!response.ok) {
-        setMessage("Ticket submitted successfully! Email notification may have failed.");
-        setMessageType("warning");
+        setMessage("⚠️ Email notification failed.");
       } else {
-        setMessage("Ticket submitted successfully! You'll receive a confirmation email shortly.");
-        setMessageType("success");
+        setMessage("Ticket submitted!");
       }
 
       setTitle("");
@@ -118,7 +113,6 @@ export default function LogTicket() {
       setSelectedUser("");
     } catch (err) {
       setMessage("Error submitting ticket: " + err.message);
-      setMessageType("error");
     } finally {
       setIsSubmitting(false);
     }
@@ -126,9 +120,6 @@ export default function LogTicket() {
 
   const closePopup = () => {
     setMessage(null);
-    if (messageType === "success") {
-      router.push("/my-tickets");
-    }
   };
 
   return (
@@ -139,194 +130,107 @@ export default function LogTicket() {
     >
       <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
 
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-red-600 to-red-800 dark:from-red-800 dark:to-red-900 py-16 text-white">
-        <div className="container mx-auto px-4 text-center">
-          <div className="max-w-2xl mx-auto space-y-4">
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <Ticket className="h-12 w-12" />
-              <h1 className="text-4xl font-extrabold">Log a Support Ticket</h1>
-            </div>
-            <p className="text-lg text-gray-200">
-              Need help? Report an issue and our technical team will get back to you as soon as possible.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Main Content */}
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-2xl mx-auto">
-          <div
-            className={`rounded-3xl shadow-xl p-8 ${
-              darkMode ? "bg-gray-800" : "bg-white"
-            } border border-gray-200 dark:border-gray-700`}
+      <div className="flex justify-center items-center py-12 px-4 sm:px-6 lg:px-8">
+        <div
+          className={`w-full max-w-lg rounded-3xl shadow-xl p-10 ${
+            darkMode ? "bg-gray-800" : "bg-white"
+          }`}
+        >
+          <h2
+            className={`text-3xl font-extrabold mb-8 ${
+              darkMode ? "text-red-300" : "text-red-600"
+            }`}
           >
-            {/* Technician Section */}
-            {isTech && (
-              <div className="mb-8 p-6 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800">
-                <div className="flex items-center gap-2 mb-4">
-                  <Users className="h-5 w-5 text-red-600 dark:text-red-400" />
-                  <h3 className="text-lg font-semibold text-red-700 dark:text-red-300">
-                    Technician Options
-                  </h3>
-                </div>
-                <label
-                  className={`block mb-2 text-sm font-medium ${
-                    darkMode ? "text-gray-300" : "text-gray-700"
-                  }`}
-                >
-                  Log ticket for another user (optional)
-                </label>
-                <select
-                  className={`w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2
-                    focus:ring-red-400 transition-all
-                    ${
-                      darkMode
-                        ? "bg-gray-700 border-gray-600 text-gray-200"
-                        : "bg-gray-50 border-gray-300 text-gray-900"
-                    }`}
-                  value={selectedUser}
-                  onChange={(e) => setSelectedUser(e.target.value)}
-                >
-                  <option value="">Select a user (leave blank for yourself)</option>
-                  {allUsers.map((u) => (
-                    <option key={u.id} value={u.id}>
-                      {u.name} {u.surname} ({u.email})
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
+            📝 Log a Ticket
+          </h2>
 
-            {/* Form Fields */}
-            <div className="space-y-6">
-              <div>
-                <label
-                  className={`block mb-2 text-sm font-medium ${
-                    darkMode ? "text-gray-300" : "text-gray-700"
-                  }`}
-                >
-                  Issue Title *
-                </label>
-                <input
-                  type="text"
-                  className={`w-full px-4 py-3 rounded-xl border placeholder-gray-400
-                    focus:outline-none focus:ring-2 focus:ring-red-400 transition-all
-                    ${
-                      darkMode
-                        ? "bg-gray-700 border-gray-600 text-gray-200"
-                        : "bg-gray-50 border-gray-300 text-gray-900"
-                    }`}
-                  placeholder="Brief description of the issue"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  maxLength={100}
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  {title.length}/100 characters
-                </p>
-              </div>
-
-              <div>
-                <label
-                  className={`block mb-2 text-sm font-medium ${
-                    darkMode ? "text-gray-300" : "text-gray-700"
-                  }`}
-                >
-                  Detailed Description *
-                </label>
-                <textarea
-                  className={`w-full px-4 py-3 rounded-xl border placeholder-gray-400
-                    focus:outline-none focus:ring-2 focus:ring-red-400 resize-none transition-all
-                    ${
-                      darkMode
-                        ? "bg-gray-700 border-gray-600 text-gray-200"
-                        : "bg-gray-50 border-gray-300 text-gray-900"
-                    }`}
-                  placeholder="Please provide detailed information about the issue, including steps to reproduce, error messages, and any relevant context..."
-                  rows={6}
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  maxLength={1000}
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  {description.length}/1000 characters
-                </p>
-              </div>
-
-              {/* Submit Button */}
-              <button
-                onClick={submitTicket}
-                disabled={isSubmitting || !title.trim() || !description.trim()}
-                className={`w-full font-semibold py-4 rounded-xl shadow-lg transition-all transform flex items-center justify-center gap-3
-                  ${
-                    isSubmitting || !title.trim() || !description.trim()
-                      ? "bg-gray-400 cursor-not-allowed"
-                      : "bg-red-600 hover:bg-red-700 hover:scale-105 active:scale-95"
-                  } text-white`}
+          {isTech && (
+            <div className="mb-6">
+              <label
+                className={`block mb-2 text-sm font-semibold ${
+                  darkMode ? "text-gray-300" : "text-gray-700"
+                }`}
               >
-                {isSubmitting ? (
-                  <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    Submitting...
-                  </>
-                ) : (
-                  <>
-                    <Send className="h-5 w-5" />
-                    Submit Ticket
-                  </>
-                )}
-              </button>
+                Log Ticket For
+              </label>
+              <select
+                className={`w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2
+                  focus:ring-red-400 transition
+                  ${
+                    darkMode
+                      ? "bg-gray-700 border-gray-600 text-gray-200"
+                      : "bg-gray-100 border-gray-300 text-gray-900"
+                  }`}
+                value={selectedUser}
+                onChange={(e) => setSelectedUser(e.target.value)}
+              >
+                <option value="">Select a User</option>
+                {allUsers.map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.name} {u.surname} ({u.email})
+                  </option>
+                ))}
+              </select>
             </div>
+          )}
 
-            {/* Help Text */}
-            <div className="mt-8 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
-              <h4 className="font-medium text-blue-800 dark:text-blue-300 mb-2">
-                💡 Tips for better support:
-              </h4>
-              <ul className="text-sm text-blue-700 dark:text-blue-400 space-y-1">
-                <li>• Be specific about what you were trying to do</li>
-                <li>• Include any error messages you saw</li>
-                <li>• Mention what browser/device you're using</li>
-                <li>• Describe what you expected vs. what actually happened</li>
-              </ul>
-            </div>
-          </div>
+          <input
+            type="text"
+            className={`w-full mb-5 px-5 py-3 rounded-2xl border placeholder-gray-400
+              focus:outline-none focus:ring-2 focus:ring-red-400 transition
+              ${
+                darkMode
+                  ? "bg-gray-700 border-gray-600 text-gray-200"
+                  : "bg-gray-100 border-gray-300 text-gray-900"
+              }`}
+            placeholder="Title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+
+          <textarea
+            className={`w-full mb-6 px-5 py-3 rounded-2xl border placeholder-gray-400
+              focus:outline-none focus:ring-2 focus:ring-red-400 resize-none transition
+              ${
+                darkMode
+                  ? "bg-gray-700 border-gray-600 text-gray-200"
+                  : "bg-gray-100 border-gray-300 text-gray-900"
+              }`}
+            placeholder="Description"
+            rows={5}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+
+          <button
+            onClick={submitTicket}
+            disabled={isSubmitting}
+            className={`w-full font-semibold py-3 rounded-3xl shadow-lg transition transform 
+              ${
+                isSubmitting
+                  ? "bg-red-400 cursor-not-allowed"
+                  : "bg-red-600 hover:bg-red-700 hover:-translate-y-0.5 active:translate-y-0"
+              } text-white`}
+          >
+            {isSubmitting ? "Submitting…" : "🚀 Submit Ticket"}
+          </button>
         </div>
       </div>
 
-      {/* Enhanced Pop-up Modal */}
+      {/* Pop-up Modal */}
       {message && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 p-4">
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
           <div
-            className={`p-6 rounded-xl shadow-lg max-w-md w-full ${
+            className={`p-6 rounded-xl shadow-lg max-w-sm w-full ${
               darkMode ? "bg-gray-800 text-gray-200" : "bg-white text-gray-900"
-            } border ${
-              messageType === "success" ? "border-green-200 dark:border-green-800" :
-              messageType === "error" ? "border-red-200 dark:border-red-800" :
-              "border-yellow-200 dark:border-yellow-800"
             }`}
           >
-            <div className="flex items-center gap-3 mb-4">
-              {messageType === "success" && <CheckCircle className="h-6 w-6 text-green-500" />}
-              {messageType === "error" && <AlertCircle className="h-6 w-6 text-red-500" />}
-              {messageType === "warning" && <AlertCircle className="h-6 w-6 text-yellow-500" />}
-              <h3 className="font-semibold">
-                {messageType === "success" ? "Success!" : 
-                 messageType === "error" ? "Error" : "Warning"}
-              </h3>
-            </div>
-            <p className="text-sm mb-6">{message}</p>
+            <p className="text-center mb-4">{message}</p>
             <button
               onClick={closePopup}
-              className={`w-full py-3 rounded-md font-medium transition-all ${
-                messageType === "success" ? "bg-green-600 hover:bg-green-700" :
-                messageType === "error" ? "bg-red-600 hover:bg-red-700" :
-                "bg-yellow-600 hover:bg-yellow-700"
-              } text-white`}
+              className="w-full bg-red-600 text-white py-2 rounded-md hover:bg-red-700 transition"
             >
-              {messageType === "success" ? "View My Tickets" : "Close"}
+              Close
             </button>
           </div>
         </div>
