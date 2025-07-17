@@ -14,8 +14,8 @@ export default function LogTicket() {
   const [isTech, setIsTech] = useState(false);
   const [allUsers, setAllUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false); // 🔥 New state
-  const [message, setMessage] = useState(null); // For pop-up messages
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [message, setMessage] = useState(null);
   const { darkMode, setDarkMode } = useDarkMode();
   const router = useRouter();
 
@@ -59,9 +59,7 @@ export default function LogTicket() {
   }, [router]);
 
   const submitTicket = async () => {
-    // Prevent double clicks
     if (isSubmitting) return;
-
     if (!title || !description) {
       setMessage("Please fill in all fields.");
       return;
@@ -91,53 +89,46 @@ export default function LogTicket() {
 
       await push(ref(db, "tickets"), ticketData);
 
-      // Trigger email function
       const response = await fetch("/.netlify/functions/sendTicketEmail", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title,
-          description,
-          email: user.email,
-        }),
+        body: JSON.stringify({ title, description, email: user.email }),
       });
 
       if (!response.ok) {
         setMessage("⚠️ Email notification failed.");
       } else {
-        setMessage("Ticket submitted!");
+        setMessage("✅ Ticket submitted!");
       }
 
       setTitle("");
       setDescription("");
       setSelectedUser("");
     } catch (err) {
-      setMessage("Error submitting ticket: " + err.message);
+      setMessage("❌ Error submitting ticket: " + err.message);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const closePopup = () => {
-    setMessage(null);
-  };
+  const closePopup = () => setMessage(null);
 
   return (
     <div
-      className={`${
+      className={`min-h-screen transition-colors duration-500 ${
         darkMode ? "bg-gray-900 text-gray-100" : "bg-gray-50 text-gray-900"
-      } min-h-screen transition-colors duration-500`}
+      }`}
     >
       <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
 
       <div className="flex justify-center items-center py-12 px-4 sm:px-6 lg:px-8">
         <div
-          className={`w-full max-w-lg rounded-3xl shadow-xl p-10 ${
+          className={`w-full max-w-lg p-8 rounded-3xl shadow-2xl ${
             darkMode ? "bg-gray-800" : "bg-white"
           }`}
         >
           <h2
-            className={`text-3xl font-extrabold mb-8 ${
+            className={`text-3xl font-extrabold mb-6 text-center ${
               darkMode ? "text-red-300" : "text-red-600"
             }`}
           >
@@ -145,7 +136,7 @@ export default function LogTicket() {
           </h2>
 
           {isTech && (
-            <div className="mb-6">
+            <div className="mb-5">
               <label
                 className={`block mb-2 text-sm font-semibold ${
                   darkMode ? "text-gray-300" : "text-gray-700"
@@ -176,6 +167,7 @@ export default function LogTicket() {
 
           <input
             type="text"
+            placeholder="Title"
             className={`w-full mb-5 px-5 py-3 rounded-2xl border placeholder-gray-400
               focus:outline-none focus:ring-2 focus:ring-red-400 transition
               ${
@@ -183,12 +175,13 @@ export default function LogTicket() {
                   ? "bg-gray-700 border-gray-600 text-gray-200"
                   : "bg-gray-100 border-gray-300 text-gray-900"
               }`}
-            placeholder="Title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
 
           <textarea
+            placeholder="Description"
+            rows={5}
             className={`w-full mb-6 px-5 py-3 rounded-2xl border placeholder-gray-400
               focus:outline-none focus:ring-2 focus:ring-red-400 resize-none transition
               ${
@@ -196,8 +189,6 @@ export default function LogTicket() {
                   ? "bg-gray-700 border-gray-600 text-gray-200"
                   : "bg-gray-100 border-gray-300 text-gray-900"
               }`}
-            placeholder="Description"
-            rows={5}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
@@ -217,11 +208,10 @@ export default function LogTicket() {
         </div>
       </div>
 
-      {/* Pop-up Modal */}
       {message && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
           <div
-            className={`p-6 rounded-xl shadow-lg max-w-sm w-full ${
+            className={`p-6 rounded-xl shadow-xl max-w-sm w-full mx-4 ${
               darkMode ? "bg-gray-800 text-gray-200" : "bg-white text-gray-900"
             }`}
           >
