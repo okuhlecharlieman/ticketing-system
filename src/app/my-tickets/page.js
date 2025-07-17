@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 export default function MyTickets() {
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState(null);
   const { darkMode, setDarkMode } = useDarkMode();
   const router = useRouter();
 
@@ -19,12 +20,17 @@ export default function MyTickets() {
         router.replace("/signin");
         return;
       }
+      setCurrentUser(user);
+
       const ticketsRef = ref(db, "tickets");
       onValue(ticketsRef, (snapshot) => {
         const data = snapshot.val() || {};
-        const userTickets = Object.entries(data).filter(
-          ([_, ticket]) => ticket.loggedBy === user.email
-        );
+        // Filter tickets where loggedByUid or loggedFor equals currentUser.uid
+        const userTickets = Object.entries(data).filter(([_, ticket]) => {
+          return (
+            ticket.loggedByUid === user.uid || ticket.loggedFor === user.uid
+          );
+        });
         setTickets(userTickets);
         setLoading(false);
       });
@@ -111,7 +117,7 @@ export default function MyTickets() {
                           }`}
                         >
                           <span className="font-bold text-indigo-400">
-                            {comment.user}
+                            {comment.author /* changed from comment.user */}
                           </span>
                           : {comment.text}
                         </li>
