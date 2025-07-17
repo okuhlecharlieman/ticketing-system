@@ -136,48 +136,48 @@ export default function Home() {
           )}
         </nav>
 
-        // {/* Tickets Input */}
-        // {user && (
-        //   <section className="w-full max-w-xl">
-        //     <h3 className="text-xl font-semibold mb-3">Log a new support ticket:</h3>
-        //     <div className="flex gap-4">
-        //       <input
-        //         type="text"
-        //         placeholder="Describe your issue..."
-        //         className="flex-grow px-4 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-600 dark:focus:ring-red-400"
-        //         value={newTicket}
-        //         onChange={(e) => setNewTicket(e.target.value)}
-        //         onKeyDown={(e) => {
-        //           if (e.key === "Enter") addTicket();
-        //         }}
-        //       />
-        //       <button
-        //         onClick={addTicket}
-        //         className="bg-red-600 hover:bg-red-700 text-white px-6 rounded-md transition"
-        //       >
-        //         Add
-        //       </button>
-        //     </div>
-        //   </section>
-        // )}
+{/*  {/* Tickets Input */}
+        {user && (
+          <section className="w-full max-w-xl">
+            <h3 className="text-xl font-semibold mb-3">Log a new support ticket:</h3>
+            <div className="flex gap-4">
+              <input
+                type="text"
+                placeholder="Describe your issue..."
+                className="flex-grow px-4 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-600 dark:focus:ring-red-400"
+                value={newTicket}
+                onChange={(e) => setNewTicket(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") addTicket();
+                }}
+              />
+              <button
+                onClick={addTicket}
+                className="bg-red-600 hover:bg-red-700 text-white px-6 rounded-md transition"
+              >
+                Add
+              </button>
+            </div>
+          </section>
+        )}
 
-        // {/* Tickets List */}
-        // {tickets.length > 0 && (
-        //   <section className="w-full max-w-xl">
-        //     <h3 className="text-xl font-semibold mb-3">Tickets:</h3>
-        //     <ul className="space-y-2 max-h-64 overflow-y-auto">
-        //       {tickets.map(([id, ticket]) => (
-        //         <li
-        //           key={id}
-        //           className="bg-white dark:bg-gray-800 p-3 rounded-md shadow hover:shadow-lg transition cursor-default truncate"
-        //           title={ticket.text}
-        //         >
-        //           {ticket.text}
-        //         </li>
-        //       ))}
-        //     </ul>
-        //   </section>
-        // )}
+        {/* Tickets List */}
+        {tickets.length > 0 && (
+          <section className="w-full max-w-xl">
+            <h3 className="text-xl font-semibold mb-3">Tickets:</h3>
+            <ul className="space-y-2 max-h-64 overflow-y-auto">
+              {tickets.map(([id, ticket]) => (
+                <li
+                  key={id}
+                  className="bg-white dark:bg-gray-800 p-3 rounded-md shadow hover:shadow-lg transition cursor-default truncate"
+                  title={ticket.text}
+                >
+                  {ticket.text}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}*/}
 
         {/* News Section */}
         <section className="w-full max-w-3xl">
