@@ -14,7 +14,8 @@ export default function LogTicket() {
   const [isTech, setIsTech] = useState(false);
   const [allUsers, setAllUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);  // 🔥 New state
+  const [isSubmitting, setIsSubmitting] = useState(false); // 🔥 New state
+  const [message, setMessage] = useState(null); // For pop-up messages
   const { darkMode, setDarkMode } = useDarkMode();
   const router = useRouter();
 
@@ -62,11 +63,11 @@ export default function LogTicket() {
     if (isSubmitting) return;
 
     if (!title || !description) {
-      alert("Please fill in all fields.");
+      setMessage("Please fill in all fields.");
       return;
     }
     if (!user) {
-      alert("You must be logged in to submit a ticket.");
+      setMessage("You must be logged in to submit a ticket.");
       return;
     }
 
@@ -102,18 +103,23 @@ export default function LogTicket() {
       });
 
       if (!response.ok) {
-        alert("⚠️ Email notification failed.");
+        setMessage("⚠️ Email notification failed.");
+      } else {
+        setMessage("Ticket submitted!");
       }
 
       setTitle("");
       setDescription("");
       setSelectedUser("");
-      alert("Ticket submitted!");
     } catch (err) {
-      alert("Error submitting ticket: " + err.message);
+      setMessage("Error submitting ticket: " + err.message);
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const closePopup = () => {
+    setMessage(null);
   };
 
   return (
@@ -132,7 +138,7 @@ export default function LogTicket() {
         >
           <h2
             className={`text-3xl font-extrabold mb-8 ${
-              darkMode ? "text-indigo-300" : "text-indigo-600"
+              darkMode ? "text-red-300" : "text-red-600"
             }`}
           >
             📝 Log a Ticket
@@ -149,7 +155,7 @@ export default function LogTicket() {
               </label>
               <select
                 className={`w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2
-                  focus:ring-indigo-400 transition
+                  focus:ring-red-400 transition
                   ${
                     darkMode
                       ? "bg-gray-700 border-gray-600 text-gray-200"
@@ -171,7 +177,7 @@ export default function LogTicket() {
           <input
             type="text"
             className={`w-full mb-5 px-5 py-3 rounded-2xl border placeholder-gray-400
-              focus:outline-none focus:ring-2 focus:ring-indigo-400 transition
+              focus:outline-none focus:ring-2 focus:ring-red-400 transition
               ${
                 darkMode
                   ? "bg-gray-700 border-gray-600 text-gray-200"
@@ -184,7 +190,7 @@ export default function LogTicket() {
 
           <textarea
             className={`w-full mb-6 px-5 py-3 rounded-2xl border placeholder-gray-400
-              focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none transition
+              focus:outline-none focus:ring-2 focus:ring-red-400 resize-none transition
               ${
                 darkMode
                   ? "bg-gray-700 border-gray-600 text-gray-200"
@@ -202,14 +208,33 @@ export default function LogTicket() {
             className={`w-full font-semibold py-3 rounded-3xl shadow-lg transition transform 
               ${
                 isSubmitting
-                  ? "bg-indigo-400 cursor-not-allowed"
-                  : "bg-indigo-600 hover:bg-indigo-700 hover:-translate-y-0.5 active:translate-y-0"
+                  ? "bg-red-400 cursor-not-allowed"
+                  : "bg-red-600 hover:bg-red-700 hover:-translate-y-0.5 active:translate-y-0"
               } text-white`}
           >
             {isSubmitting ? "Submitting…" : "🚀 Submit Ticket"}
           </button>
         </div>
       </div>
+
+      {/* Pop-up Modal */}
+      {message && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+          <div
+            className={`p-6 rounded-xl shadow-lg max-w-sm w-full ${
+              darkMode ? "bg-gray-800 text-gray-200" : "bg-white text-gray-900"
+            }`}
+          >
+            <p className="text-center mb-4">{message}</p>
+            <button
+              onClick={closePopup}
+              className="w-full bg-red-600 text-white py-2 rounded-md hover:bg-red-700 transition"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
