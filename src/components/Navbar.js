@@ -37,13 +37,13 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`w-full px-4 py-3 shadow-md flex justify-between items-center ${
-        darkMode ? "bg-zinc-800 text-white" : "bg-white text-gray-900"
-      } transition-colors duration-300`}
+      className={`w-full px-4 py-4 sticky top-0 z-50 shadow-lg flex justify-between items-center transition-colors duration-300 ${
+        darkMode ? "bg-red-800 text-white" : "bg-red-500 text-white"
+      }`}
     >
       <Link
         href="/"
-        className="text-lg font-extrabold text-blue-600 dark:text-blue-300"
+        className="text-lg font-extrabold tracking-tight hover:scale-105 transition-transform duration-200"
       >
         🎫 Tickitie
       </Link>
@@ -53,25 +53,24 @@ export default function Navbar() {
           <>
             <Link
               href="/log-ticket"
-              className="hover:underline hover:text-blue-500"
+              className="hover:underline hover:text-gray-200 font-medium"
             >
               Log Ticket
             </Link>
 
-              <Link
-                href="/my-tickets"
-                className="hover:underline hover:text-blue-500"
-              >
-                My Tickets
-              </Link>
-            
+            <Link
+              href="/my-tickets"
+              className="hover:underline hover:text-gray-200 font-medium"
+            >
+              My Tickets
+            </Link>
           </>
         )}
 
         {isTechnician && (
           <Link
             href="/technician"
-            className="hover:underline hover:text-indigo-500"
+            className="hover:underline hover:text-yellow-200 font-medium"
           >
             Dashboard
           </Link>
@@ -81,25 +80,25 @@ export default function Navbar() {
           <>
             <Link
               href="/signin"
-              className="text-green-600 hover:underline"
+              className="text-white hover:underline hover:text-gray-200 font-medium"
             >
               Sign In
             </Link>
             <Link
               href="/signup"
-              className="text-purple-600 hover:underline"
+              className="text-white hover:underline hover:text-gray-200 font-medium"
             >
               Sign Up
             </Link>
           </>
         ) : (
           <>
-            <span className="text-xs text-gray-500 dark:text-gray-300">
+            <span className="text-xs text-white opacity-75">
               {user.email} ({isTechnician ? "Technician" : "User"})
             </span>
             <button
               onClick={handleLogout}
-              className="text-xs bg-red-500 text-white px-3 py-1 rounded hover:bg-red-700"
+              className="text-xs bg-white text-red-600 px-3 py-1 rounded hover:bg-gray-100 transition-all"
             >
               Logout
             </button>
@@ -108,7 +107,7 @@ export default function Navbar() {
 
         <button
           onClick={() => setDarkMode(!darkMode)}
-          className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-zinc-700 transition"
+          className="p-2 rounded-full hover:bg-red-700 dark:hover:bg-red-900 transition"
           aria-label="Toggle dark mode"
         >
           {darkMode ? <Sun size={18} /> : <Moon size={18} />}
