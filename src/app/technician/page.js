@@ -1,15 +1,8 @@
-"use client"
+"use client";
 
 import { useEffect, useState, useMemo } from "react";
 import { db, auth } from "../../lib/firebase";
-import {
-  ref,
-  onValue,
-  update,
-  remove,
-  get,
-  push,
-} from "firebase/database";
+import { ref, onValue, update, remove, get, push } from "firebase/database";
 import { useRouter } from "next/navigation";
 import Navbar from "../../components/Navbar";
 import { useDarkMode } from "../../context/DarkModeContext";
@@ -54,8 +47,9 @@ export default function Technician() {
   }, [router]);
 
   const filteredTickets = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+
     return tickets.filter(([_, ticket]) => {
-      const term = searchTerm.trim().toLowerCase();
       const matchesTerm =
         ticket.title.toLowerCase().includes(term) ||
         ticket.description.toLowerCase().includes(term) ||
@@ -153,7 +147,11 @@ export default function Technician() {
 
   if (loading || isTechnician === null) {
     return (
-      <div className="flex items-center justify-center h-screen text-xl text-gray-500">
+      <div
+        className={`flex items-center justify-center h-screen text-xl font-semibold ${
+          darkMode ? "text-gray-400" : "text-gray-600"
+        }`}
+      >
         Loading...
       </div>
     );
@@ -161,12 +159,12 @@ export default function Technician() {
 
   return (
     <div
-      className={`${
+      className={`min-h-screen transition-colors duration-500 font-sans ${
         darkMode ? "bg-gray-900 text-gray-100" : "bg-gray-50 text-gray-900"
-      } min-h-screen transition-colors duration-500`}
+      }`}
     >
       <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
-      <div className="flex justify-center items-start px-4 py-10">
+      <main className="flex justify-center items-start px-4 py-10">
         <div
           className={`w-full max-w-4xl rounded-3xl shadow-xl p-8 ${
             darkMode ? "bg-gray-800" : "bg-white"
@@ -217,30 +215,34 @@ export default function Technician() {
           {/* Ticket List */}
           <ul className="space-y-6">
             {filteredTickets.length === 0 && (
-              <li className="text-center text-gray-500">
+              <li
+                className={`text-center italic ${
+                  darkMode ? "text-gray-400" : "text-gray-600"
+                }`}
+              >
                 No tickets match your criteria.
               </li>
             )}
             {filteredTickets.map(([id, ticket]) => (
               <li
                 key={id}
-                className={`rounded-2xl p-6 shadow-md flex flex-col gap-3 ${
+                className={`rounded-3xl p-6 shadow-md flex flex-col gap-4 ${
                   darkMode ? "bg-gray-700" : "bg-blue-50"
                 }`}
               >
                 <div>
-                  <h3 className="text-lg font-semibold">{ticket.title}</h3>
-                  <p className="text-sm mb-2">{ticket.description}</p>
+                  <h3 className="text-xl font-semibold">{ticket.title}</h3>
+                  <p className="text-md mb-2">{ticket.description}</p>
                   <span
-                    className={`text-xs font-semibold ${
+                    className={`inline-block text-sm font-semibold px-3 py-1 rounded-full ${
                       ticket.status === "resolved"
-                        ? "text-green-500"
-                        : "text-yellow-500"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-yellow-100 text-yellow-700"
                     }`}
                   >
                     Status: {ticket.status}
                   </span>
-                  <div className="text-xs text-gray-400 mt-1">
+                  <div className="text-xs text-gray-400 mt-2">
                     Logged at:{" "}
                     {ticket.createdAt ||
                       (ticket.created
@@ -254,15 +256,19 @@ export default function Technician() {
 
                 {/* Comment List */}
                 <div className="mt-4">
-                  <h4 className="font-semibold mb-2">💬 Comments</h4>
+                  <h4 className="font-semibold mb-2 text-sm">💬 Comments</h4>
                   {ticket.comments ? (
-                    <ul className="space-y-2 text-sm">
+                    <ul className="space-y-2 text-sm max-h-48 overflow-y-auto">
                       {Object.entries(ticket.comments).map(([cid, comment]) => (
                         <li
                           key={cid}
-                          className="border-l-4 pl-2 border-blue-400"
+                          className={`border-l-4 pl-3 py-1 rounded-r-md ${
+                            darkMode
+                              ? "border-blue-400 bg-gray-600 text-gray-200"
+                              : "border-blue-500 bg-blue-100 text-blue-900"
+                          }`}
                         >
-                          <div className="text-xs text-gray-400">
+                          <div className="text-xs text-gray-400 mb-1">
                             {new Date(comment.timestamp).toLocaleString()} -{" "}
                             {comment.author}
                           </div>
@@ -271,7 +277,9 @@ export default function Technician() {
                       ))}
                     </ul>
                   ) : (
-                    <p className="text-xs text-gray-400">No comments yet.</p>
+                    <p className={`text-xs italic ${darkMode ? "text-gray-400" : "text-gray-600"}`}>
+                      No comments yet.
+                    </p>
                   )}
 
                   {/* Add Comment */}
@@ -292,7 +300,7 @@ export default function Technician() {
                       className={`flex-grow px-3 py-2 rounded border text-sm focus:outline-none ${
                         darkMode
                           ? "bg-gray-600 border-gray-500 text-white"
-                          : "bg-gray-100 border-gray-300"
+                          : "bg-gray-100 border-gray-300 text-gray-900"
                       }`}
                     />
                     <button
@@ -325,7 +333,7 @@ export default function Technician() {
             ))}
           </ul>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
