@@ -32,12 +32,12 @@ export default function MyTickets() {
       const techStatus = userData?.isTechnician || false;
       setIsTechnician(techStatus);
 
-      if (techStatus) {
+
         // fetch all users for dropdown
         const usersRef = ref(db, "users");
         const usersSnap = await get(usersRef);
         setAllUsers(usersSnap.val() || {});
-      }
+      
 
       // Subscribe tickets
       const ticketsRef = ref(db, "tickets");
