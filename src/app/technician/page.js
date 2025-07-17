@@ -140,7 +140,8 @@ export default function Technician() {
             ? new Date(ticket.created).toLocaleString()
             : "N/A")
       ),
-      formatValue(ticket.loggedFor || "N/A"),
+      formatValue(allUsers[ticket.loggedFor]?.email || "N/A"),
+,
       formatValue(ticket.isLoggedByTech ? "Yes" : "No"),
     ]);
 
@@ -155,7 +156,7 @@ export default function Technician() {
     link.href = url;
     link.setAttribute(
       "download",
-      `filtered_tickets_${new Date().toISOString().slice(0, 10)}.csv`
+      `Technician_ticket_report_${new Date().toISOString().slice(0, 10)}.csv`
     );
     document.body.appendChild(link);
     link.click();
