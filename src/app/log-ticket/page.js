@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState, useEffect } from "react";
 import { db, auth } from "../../lib/firebase";
 import { ref, push, get } from "firebase/database";
@@ -14,7 +15,7 @@ export default function LogTicket() {
   const [isTech, setIsTech] = useState(false);
   const [allUsers, setAllUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);  // 🔥 New state
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { darkMode, setDarkMode } = useDarkMode();
   const router = useRouter();
 
@@ -57,11 +58,12 @@ export default function LogTicket() {
     return () => unsubscribe();
   }, [router]);
 
-  const submitTicket = async () => {
-    // Prevent double clicks
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
     if (isSubmitting) return;
 
-    if (!title || !description) {
+    if (!title.trim() || !description.trim()) {
       alert("Please fill in all fields.");
       return;
     }
@@ -74,8 +76,8 @@ export default function LogTicket() {
 
     try {
       const ticketData = {
-        title,
-        description,
+        title: title.trim(),
+        description: description.trim(),
         status: "open",
         created: Date.now(),
         createdAt: new Date().toLocaleString(),
@@ -125,10 +127,12 @@ export default function LogTicket() {
       <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
 
       <div className="flex justify-center items-center py-12 px-4 sm:px-6 lg:px-8">
-        <div
+        <form
+          onSubmit={handleSubmit}
           className={`w-full max-w-lg rounded-3xl shadow-xl p-10 ${
             darkMode ? "bg-gray-800" : "bg-white"
           }`}
+          noValidate
         >
           <h2
             className={`text-3xl font-extrabold mb-8 ${
@@ -141,6 +145,7 @@ export default function LogTicket() {
           {isTech && (
             <div className="mb-6">
               <label
+                htmlFor="loggedForUser"
                 className={`block mb-2 text-sm font-semibold ${
                   darkMode ? "text-gray-300" : "text-gray-700"
                 }`}
@@ -148,6 +153,7 @@ export default function LogTicket() {
                 Log Ticket For
               </label>
               <select
+                id="loggedForUser"
                 className={`w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2
                   focus:ring-indigo-400 transition
                   ${
@@ -170,6 +176,7 @@ export default function LogTicket() {
 
           <input
             type="text"
+            id="title"
             className={`w-full mb-5 px-5 py-3 rounded-2xl border placeholder-gray-400
               focus:outline-none focus:ring-2 focus:ring-indigo-400 transition
               ${
@@ -180,9 +187,11 @@ export default function LogTicket() {
             placeholder="Title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            autoComplete="off"
           />
 
           <textarea
+            id="description"
             className={`w-full mb-6 px-5 py-3 rounded-2xl border placeholder-gray-400
               focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none transition
               ${
@@ -197,7 +206,7 @@ export default function LogTicket() {
           />
 
           <button
-            onClick={submitTicket}
+            type="submit"
             disabled={isSubmitting}
             className={`w-full font-semibold py-3 rounded-3xl shadow-lg transition transform 
               ${
@@ -208,7 +217,7 @@ export default function LogTicket() {
           >
             {isSubmitting ? "Submitting…" : "🚀 Submit Ticket"}
           </button>
-        </div>
+        </form>
       </div>
     </div>
   );
