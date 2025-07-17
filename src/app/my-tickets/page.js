@@ -177,13 +177,15 @@ export default function MyTickets() {
                   <p className="text-xs text-gray-500 mt-1">
                     Logged by: {ticket.loggedBy || "Unknown"}
                   </p>
-                 {ticket.isLoggedByTech && (
+       {ticket.isLoggedByTech && ticket.loggedFor && (
   <p className="text-xs text-gray-500 mt-1">
-    Logged for: {ticket.loggedFor && allUsers[ticket.loggedFor]
+    Logged for:{" "}
+    {allUsers[ticket.loggedFor]?.email
       ? allUsers[ticket.loggedFor].email
-      : ticket.loggedFor || "N/A"}
+      : "Unknown user"}
   </p>
 )}
+
                 </div>
 
                 <div className="mt-4">
