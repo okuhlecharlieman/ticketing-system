@@ -74,7 +74,7 @@ export default function Home() {
   return (
     <div className={`${darkMode ? "bg-gray-900 text-gray-200" : "bg-gray-100 text-gray-800"} min-h-screen transition-colors duration-500 font-sans`}>
       {/* Header/Navbar */}
-      <header className="flex justify-between items-center px-6 py-4 shadow-md sticky top-0 bg-red-600 dark:bg-red-800 z-50">
+      <header className="flex justify-between items-center px-6 py-4 shadow-md sticky top-0 bg-red-500 dark:bg-red-800 z-50">
         <div className="flex items-center space-x-4">
           <img src={logoUrl} alt="Heart FM Logo" className="h-10" />
           <h1 className="text-2xl font-extrabold text-white select-none">Tickitie</h1>
