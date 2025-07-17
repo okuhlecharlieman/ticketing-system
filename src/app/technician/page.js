@@ -64,20 +64,27 @@ export default function Technician() {
   };
 
   const filteredTickets = useMemo(() => {
-    const term = searchTerm.trim().toLowerCase();
+  const term = searchTerm.trim().toLowerCase();
 
-    return tickets.filter(([_, ticket]) => {
-      const matchesTerm =
-        ticket.title.toLowerCase().includes(term) ||
-        ticket.description.toLowerCase().includes(term) ||
-        (ticket.loggedBy || "").toLowerCase().includes(term);
+  return tickets.filter(([_, ticket]) => {
+    const loggedByDisplay = getUserDisplay(ticket.loggedByUid).toLowerCase();
+    const loggedForDisplay = getUserDisplay(ticket.loggedFor)?.toLowerCase?.() || "";
 
-      const matchesStatus =
-        filterStatus === "all" || ticket.status === filterStatus;
+    const matchesTerm =
+      ticket.title?.toLowerCase().includes(term) ||
+      ticket.description?.toLowerCase().includes(term) ||
+      ticket.status?.toLowerCase().includes(term) ||
+      (ticket.loggedBy || "").toLowerCase().includes(term) ||
+      loggedByDisplay.includes(term) ||
+      loggedForDisplay.includes(term);
 
-      return matchesTerm && matchesStatus;
-    });
-  }, [tickets, searchTerm, filterStatus]);
+    const matchesStatus =
+      filterStatus === "all" || ticket.status === filterStatus;
+
+    return matchesTerm && matchesStatus;
+  });
+}, [tickets, searchTerm, filterStatus, allUsers]);
+
 
   const markResolved = async (id, ticket) => {
     await update(ref(db, `tickets/${id}`), {
