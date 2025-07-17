@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ref, onValue } from "firebase/database";
+import { ref, onValue, get } from "firebase/database";
 import { auth, db } from "../../lib/firebase";
 import Navbar from "../../components/Navbar";
 import { useDarkMode } from "../../context/DarkModeContext";
