@@ -145,7 +145,7 @@ export default function Home() {
           <h2 className="text-2xl font-bold mb-4 text-red-600 dark:text-red-400">
             📰 What&rsquo;s Happening?
           </h2>
-          <div className="grid gap-4">
+          <div className="grid gap-4 justify-center">
             {news.length === 0 && (
               <p className="text-gray-500 dark:text-gray-400">Loading news...</p>
             )}
