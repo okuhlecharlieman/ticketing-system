@@ -13,6 +13,7 @@ export default function Technician() {
   const [isTechnician, setIsTechnician] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [allUsers, setAllUsers] = useState({});
 
   const { darkMode, setDarkMode } = useDarkMode();
   const router = useRouter();
@@ -24,6 +25,7 @@ export default function Technician() {
         return;
       }
 
+      // Fetch user data to verify technician
       const userRef = ref(db, "users/" + user.uid);
       const snap = await get(userRef);
       const userData = snap.val();
@@ -35,6 +37,14 @@ export default function Technician() {
 
       setIsTechnician(true);
 
+      // Fetch all users for display purposes
+      const usersRef = ref(db, "users");
+      get(usersRef).then((snapshot) => {
+        const usersData = snapshot.val() || {};
+        setAllUsers(usersData);
+      });
+
+      // Subscribe to tickets
       const ticketsRef = ref(db, "tickets");
       onValue(ticketsRef, (snapshot) => {
         const data = snapshot.val() || {};
@@ -45,6 +55,13 @@ export default function Technician() {
 
     return () => unsubscribe();
   }, [router]);
+
+  const getUserDisplay = (uid) => {
+    if (!uid) return "Unknown User";
+    if (!allUsers[uid]) return "Loading user...";
+    const user = allUsers[uid];
+    return `${user.name} ${user.surname} (${user.email})`;
+  };
 
   const filteredTickets = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
@@ -250,8 +267,13 @@ export default function Technician() {
                         : "N/A")}
                   </div>
                   <div className="text-xs text-gray-500 mt-1">
-                    Logged by: {ticket.loggedBy || "Unknown"}
+                    Logged by: {getUserDisplay(ticket.loggedByUid)}
                   </div>
+                  {ticket.isLoggedByTech && (
+                    <div className="text-xs text-gray-500 mt-1">
+                      Logged for: {getUserDisplay(ticket.loggedFor)}
+                    </div>
+                  )}
                 </div>
 
                 {/* Comment List */}
