@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { db, auth } from "../../lib/firebase";
 import { ref, push, get } from "firebase/database";
 import { onAuthStateChanged } from "firebase/auth";
@@ -18,6 +18,8 @@ export default function LogTicket() {
   const [message, setMessage] = useState(null);
   const { darkMode, setDarkMode } = useDarkMode();
   const router = useRouter();
+  const messageTimeoutRef = useRef(null);
+  const popupRef = useRef(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -49,6 +51,10 @@ export default function LogTicket() {
           });
 
           setAllUsers(users);
+        } else {
+          setIsTech(false);
+          setAllUsers([]);
+          setSelectedUser("");
         }
       } catch (err) {
         console.error("Error fetching user data:", err);
@@ -58,14 +64,31 @@ export default function LogTicket() {
     return () => unsubscribe();
   }, [router]);
 
+  // Auto-clear message after 5 seconds
+  useEffect(() => {
+    if (message) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      messageTimeoutRef.current = setTimeout(() => setMessage(null), 5000);
+    }
+    return () => clearTimeout(messageTimeoutRef.current);
+  }, [message]);
+
+  // Close popup if clicking outside the popup content
+  const handlePopupClick = (e) => {
+    if (popupRef.current && !popupRef.current.contains(e.target)) {
+      setMessage(null);
+    }
+  };
+
   const submitTicket = async () => {
     if (isSubmitting) return;
-    if (!title || !description) {
-      setMessage("Please fill in all fields.");
+
+    if (!title.trim() || !description.trim()) {
+      setMessage("⚠️ Please fill in all fields.");
       return;
     }
     if (!user) {
-      setMessage("You must be logged in to submit a ticket.");
+      setMessage("⚠️ You must be logged in to submit a ticket.");
       return;
     }
 
@@ -73,8 +96,8 @@ export default function LogTicket() {
 
     try {
       const ticketData = {
-        title,
-        description,
+        title: title.trim(),
+        description: description.trim(),
         status: "open",
         created: Date.now(),
         createdAt: new Date().toLocaleString(),
@@ -92,18 +115,18 @@ export default function LogTicket() {
       const response = await fetch("/.netlify/functions/sendTicketEmail", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, description, email: user.email }),
+        body: JSON.stringify({ title: ticketData.title, description: ticketData.description, email: user.email }),
       });
 
       if (!response.ok) {
         setMessage("⚠️ Email notification failed.");
       } else {
-        setMessage("✅ Ticket submitted!");
+        setMessage("✅ Ticket submitted successfully!");
+        // Reset form only on success
+        setTitle("");
+        setDescription("");
+        setSelectedUser("");
       }
-
-      setTitle("");
-      setDescription("");
-      setSelectedUser("");
     } catch (err) {
       setMessage("❌ Error submitting ticket: " + err.message);
     } finally {
@@ -111,19 +134,17 @@ export default function LogTicket() {
     }
   };
 
-  const closePopup = () => setMessage(null);
-
   return (
     <div
-      className={`min-h-screen transition-colors duration-500 ${
+      className={`min-h-screen transition-colors duration-500 flex flex-col ${
         darkMode ? "bg-gray-900 text-gray-100" : "bg-gray-50 text-gray-900"
       }`}
     >
       <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
 
-      <div className="flex justify-center items-center py-12 px-4 sm:px-6 lg:px-8">
+      <main className="flex-grow flex justify-center items-center py-12 px-4 sm:px-6 lg:px-8">
         <div
-          className={`w-full max-w-lg p-8 rounded-3xl shadow-2xl ${
+          className={`w-full max-w-lg p-8 rounded-3xl shadow-2xl transition-colors duration-300 ${
             darkMode ? "bg-gray-800" : "bg-white"
           }`}
         >
@@ -138,6 +159,7 @@ export default function LogTicket() {
           {isTech && (
             <div className="mb-5">
               <label
+                htmlFor="userSelect"
                 className={`block mb-2 text-sm font-semibold ${
                   darkMode ? "text-gray-300" : "text-gray-700"
                 }`}
@@ -145,8 +167,8 @@ export default function LogTicket() {
                 Log Ticket For
               </label>
               <select
-                className={`w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2
-                  focus:ring-red-400 transition
+                id="userSelect"
+                className={`w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-red-400 transition
                   ${
                     darkMode
                       ? "bg-gray-700 border-gray-600 text-gray-200"
@@ -168,6 +190,7 @@ export default function LogTicket() {
           <input
             type="text"
             placeholder="Title"
+            aria-label="Ticket Title"
             className={`w-full mb-5 px-5 py-3 rounded-2xl border placeholder-gray-400
               focus:outline-none focus:ring-2 focus:ring-red-400 transition
               ${
@@ -177,10 +200,13 @@ export default function LogTicket() {
               }`}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            disabled={isSubmitting}
+            autoFocus
           />
 
           <textarea
             placeholder="Description"
+            aria-label="Ticket Description"
             rows={5}
             className={`w-full mb-6 px-5 py-3 rounded-2xl border placeholder-gray-400
               focus:outline-none focus:ring-2 focus:ring-red-400 resize-none transition
@@ -191,34 +217,65 @@ export default function LogTicket() {
               }`}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
+            disabled={isSubmitting}
           />
 
           <button
             onClick={submitTicket}
             disabled={isSubmitting}
-            className={`w-full font-semibold py-3 rounded-3xl shadow-lg transition transform 
+            className={`w-full font-semibold py-3 rounded-3xl shadow-lg transition transform flex justify-center items-center gap-2
               ${
                 isSubmitting
                   ? "bg-red-400 cursor-not-allowed"
                   : "bg-red-600 hover:bg-red-700 hover:-translate-y-0.5 active:translate-y-0"
               } text-white`}
           >
+            {isSubmitting && (
+              <svg
+                className="animate-spin h-5 w-5 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v8H4z"
+                ></path>
+              </svg>
+            )}
             {isSubmitting ? "Submitting…" : "🚀 Submit Ticket"}
           </button>
         </div>
-      </div>
+      </main>
 
+      {/* Message Popup */}
       {message && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+        <div
+          onClick={handlePopupClick}
+          className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50"
+        >
           <div
-            className={`p-6 rounded-xl shadow-xl max-w-sm w-full mx-4 ${
+            ref={popupRef}
+            className={`p-6 rounded-xl shadow-xl max-w-sm w-full mx-4 transition-colors duration-300 ${
               darkMode ? "bg-gray-800 text-gray-200" : "bg-white text-gray-900"
             }`}
+            role="alert"
+            aria-live="assertive"
           >
-            <p className="text-center mb-4">{message}</p>
+            <p className="text-center mb-4 select-text">{message}</p>
             <button
-              onClick={closePopup}
-              className="w-full bg-red-600 text-white py-2 rounded-md hover:bg-red-700 transition"
+              onClick={() => setMessage(null)}
+              className="w-full bg-red-600 text-white py-2 rounded-md hover:bg-red-700 transition focus:outline-none focus:ring-2 focus:ring-red-400"
+              aria-label="Close message popup"
             >
               Close
             </button>
