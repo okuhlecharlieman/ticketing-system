@@ -16,9 +16,11 @@ export default function Home() {
   const [user, setUser] = useState(null);
   const [isTechnician, setIsTechnician] = useState(false);
   const [darkMode, setDarkMode] = useState(() =>
-    typeof window !== "undefined" && window.document.documentElement.classList.contains("dark")
+    typeof window !== "undefined" &&
+    window.document.documentElement.classList.contains("dark")
   );
 
+  // Fetch tickets
   useEffect(() => {
     const ticketsRef = ref(db, "tickets");
     onValue(ticketsRef, (snapshot) => {
@@ -27,6 +29,7 @@ export default function Home() {
     });
   }, []);
 
+  // Fetch news
   useEffect(() => {
     fetch(`https://gnews.io/api/v4/top-headlines?lang=en&token=${NEWS_API_KEY}`)
       .then((res) => res.json())
@@ -34,6 +37,7 @@ export default function Home() {
       .catch((err) => console.error("Error fetching news:", err));
   }, []);
 
+  // Auth check
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
       setUser(currentUser);
@@ -48,6 +52,7 @@ export default function Home() {
     return () => unsubscribe();
   }, []);
 
+  // Apply dark mode
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add("dark");
@@ -56,10 +61,14 @@ export default function Home() {
     }
   }, [darkMode]);
 
+  // Add ticket
   const addTicket = async () => {
     if (!newTicket.trim()) return;
     try {
-      await push(ref(db, "tickets"), { text: newTicket.trim(), created: Date.now() });
+      await push(ref(db, "tickets"), {
+        text: newTicket.trim(),
+        created: Date.now(),
+      });
       setNewTicket("");
     } catch (error) {
       console.error("Error adding ticket:", error);
@@ -131,9 +140,11 @@ export default function Home() {
           )}
         </nav>
 
-        {/* News */}
+        {/* News Section */}
         <section className="w-full max-w-3xl">
-          <h2 className="text-2xl font-bold mb-4 text-red-600 dark:text-red-400">📰 What's Happening?</h2>
+          <h2 className="text-2xl font-bold mb-4 text-red-600 dark:text-red-400">
+            📰 What&rsquo;s Happening?
+          </h2>
           <div className="grid gap-4">
             {news.length === 0 && (
               <p className="text-gray-500 dark:text-gray-400">Loading news...</p>
@@ -149,9 +160,7 @@ export default function Home() {
                 <h3 className="font-semibold text-lg text-red-700 dark:text-red-300 truncate">
                   {article.title}
                 </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  {article.source?.name}
-                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{article.source?.name}</p>
                 <p className="text-xs text-gray-500">{article.publishedAt?.slice(0, 10)}</p>
               </a>
             ))}
