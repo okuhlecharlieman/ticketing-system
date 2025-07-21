@@ -1,36 +1,160 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+<img src="https://r2cdn.perplexity.ai/pplx-full-logo-primary-dark%402x.png" class="logo" width="120"/>
+
+# Ticketing System – Next.js \& Firebase
+
+A modern ticketing/support desk web application built in Next.js, using Firebase (Realtime Database, Auth) for backend, and Tailwind CSS for styling. It supports normal users and technicians, ticket filtering, comments, and responsive dark mode UI.
+
+## Features
+
+- **User Authentication** via Firebase Auth
+- **Role-based access:** User, Technician
+- **Ticket management:** Create, view, and resolve support tickets
+- **Technician dashboard:** View and filter tickets by user
+- **Commenting system:** Add and view comments per ticket
+- **Dark mode toggle**
+- **Responsive design** optimized for mobile and desktop
+
+
+## Technology Stack
+
+| Tech | Role |
+| :-- | :-- |
+| Next.js | Frontend framework |
+| React | UI components |
+| Firebase | Backend/Auth/Database |
+| TailwindCSS | Styling |
+| PM2 (deployment) | Node.js process manager |
 
 ## Getting Started
 
-First, run the development server:
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/okuhlecharlieman/ticketing-system.git
+cd ticketing-system
+```
+
+
+### 2. Install Dependencies
+
+```bash
+npm install
+```
+
+
+### 3. Configure Environment Variables
+
+Copy `.env.example` to `.env.local` and fill in your Firebase and environment credentials:
+
+```
+NEXT_PUBLIC_FIREBASE_API_KEY=your-api-key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-auth-domain
+NEXT_PUBLIC_FIREBASE_DATABASE_URL=your-database-url
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-storage-bucket
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your-messaging-sender-id
+NEXT_PUBLIC_FIREBASE_APP_ID=your-app-id
+```
+
+**Do not commit `.env.local` to version control.**
+
+### 4. Run the App in Development
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- Visit [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Firebase Setup
 
-## Learn More
+1. Go to [Firebase Console](https://console.firebase.google.com/) and create a new project.
+2. Enable **Email/Password authentication** in Authentication settings.
+3. Set up **Realtime Database**. Ensure database rules restrict reads/writes appropriately.
+4. Add your app’s domain(s) to Firebase Auth’s allowed domains.
 
-To learn more about Next.js, take a look at the following resources:
+### Database Structure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Example paths:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `/users/{uid}`: user details, `isTechnician` for role
+- `/tickets/{ticketId}`: ticket data (`title`, `description`, `loggedByUid`, `loggedFor` (user ID or email), `status`, `createdAt`, etc.)
+- `/tickets/{ticketId}/comments/{commentId}`: comment data (`author`, `text`, `timestamp`)
 
-## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Deployment
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### To a Managed Server (e.g., Hetzner/KonsoleH)
+
+- Build app as a **standalone** Next.js server:
+
+```js
+// next.config.js
+module.exports = { output: "standalone" }
+```
+
+- Upload code to server and run install/build steps:
+
+```
+npm install
+npm run build
+```
+
+- Use **PM2** to manage the Next.js server process:
+
+```
+pm2 start .next/standalone/server.js --name ticketing-system
+```
+
+- Configure reverse proxy via Apache/Nginx to route traffic to your Node.js port.
+- Set up a cron job to resurrect PM2 on reboot.
+
+Full details in [Hetzner Next.js guide] or see your hosting provider docs.
+
+## Handover \& Maintenance
+
+- Invite new developers to Firebase Console for admin access.
+- Share repository and deployment credentials securely.
+- Update documentation with any infrastructure or logic changes.
+- Regularly audit Firebase security and app dependencies.
+
+
+## Folder Structure
+
+```plaintext
+/
+├── components/           // Reusable React components
+├── context/              // Context providers (e.g. dark mode)
+├── lib/                  // Firebase config and helpers
+├── pages/                // Next.js routes
+├── public/               // Static assets
+├── styles/               // Tailwind/global styles
+├── .env.example          // Environment variable template
+├── README.md             // This file
+```
+
+
+## Common Commands
+
+| Command | Description |
+| :-- | :-- |
+| `npm run dev` | Start dev server |
+| `npm run build` | Production build |
+| `npm start` | Start prod server |
+
+## Contributing
+
+PRs and issues welcome! Please open a pull request or create an issue for bug reports or feature requests.
+
+## License
+
+MIT – see [LICENSE](LICENSE) for details.
+
+## Credits
+
+Built and maintained by [okuhlecharlieman](https://github.com/okuhlecharlieman) and contributors.
+
+: https://community.hetzner.com/tutorials/deploy-nextjs-on-a-managed-server/
+
+
