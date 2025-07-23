@@ -1,228 +1,106 @@
+// app/my-tickets/page.jsx (refactored)
 "use client";
 
-import { useState, useEffect } from "react";
-import { ref, onValue, get } from "firebase/database";
-import { auth, db } from "../../lib/firebase";
+import { useEffect, useState, useMemo } from "react";
+import { db, auth } from "../../lib/firebase";
+import { ref, onValue, update, remove, push } from "firebase/database";
 import Navbar from "../../components/Navbar";
+import TicketCard from "../../components/TicketCard";
 import { useDarkMode } from "../../context/DarkModeContext";
-import { useRouter } from "next/navigation";
 
-export default function MyTickets() {
+export default function MyTicketsPage() {
   const [tickets, setTickets] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [currentUser, setCurrentUser] = useState(null);
-  const [allUsers, setAllUsers] = useState({});
-  const [isTechnician, setIsTechnician] = useState(false);
-  const [filterUser, setFilterUser] = useState(""); // selected user filter for tech
+  const [user, setUser] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
   const { darkMode, setDarkMode } = useDarkMode();
-  const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async (user) => {
-      if (!user) {
-        router.replace("/signin");
-        return;
-      }
-      setCurrentUser(user);
+    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+      if (!currentUser) return;
+      setUser(currentUser);
 
-      // Check if user is tech
-      const userRef = ref(db, "users/" + user.uid);
-      const snap = await get(userRef);
-      const userData = snap.val();
-      const techStatus = userData?.isTechnician || false;
-      setIsTechnician(techStatus);
-
-
-        // fetch all users for dropdown
-        const usersRef = ref(db, "users");
-        const usersSnap = await get(usersRef);
-        setAllUsers(usersSnap.val() || {});
-      
-
-      // Subscribe tickets
-      const ticketsRef = ref(db, "tickets");
-      onValue(ticketsRef, (snapshot) => {
-        const data = snapshot.val() || {};
-        setTickets(Object.entries(data));
-        setLoading(false);
+      onValue(ref(db, "tickets"), (snapshot) => {
+        const all = Object.entries(snapshot.val() || {});
+        const mine = all.filter(([_, t]) => t.loggedByUid === currentUser.uid || t.loggedFor === currentUser.uid);
+        setTickets(mine);
       });
     });
-
     return () => unsubscribe();
-  }, [router]);
+  }, []);
 
-  // Filter tickets by user for non-tech, and for tech by filterUser or all
-  const filteredTickets = tickets.filter(([_, ticket]) => {
-    if (!currentUser) return false;
+  const filtered = useMemo(() => {
+    const term = searchTerm.toLowerCase();
+    return tickets.filter(([_, t]) => {
+      const match =
+        t.title?.toLowerCase().includes(term) ||
+        t.description?.toLowerCase().includes(term) ||
+        t.status?.toLowerCase().includes(term);
+      return match && (filterStatus === "all" || t.status === filterStatus);
+    });
+  }, [tickets, searchTerm, filterStatus]);
 
-    // For user: ticket where loggedByUid or loggedFor === currentUser.uid
-    if (!isTechnician) {
-      return (
-        ticket.loggedByUid === currentUser.uid ||
-        ticket.loggedFor === currentUser.uid
-      );
-    }
-
-  
-   if (filterUser) {
-  // Only show tickets where selected user is the recipient (loggedFor)
-  return ticket.loggedFor === filterUser;
-}
-
-    // For tech no filter: show all tickets
-    return true;
-  });
-
-  // Helper: display user name + email for filter dropdown
-  const getUserDisplay = (uid) => {
-    if (!uid || !allUsers[uid]) return "Unknown User";
-    const u = allUsers[uid];
-    return `${u.name} ${u.surname} (${u.email})`;
+  const handleMarkResolved = async (id, ticket) => {
+    await update(ref(db, `tickets/${id}`), { ...ticket, status: "resolved" });
   };
 
-  if (loading) {
-    return (
-      <div
-        className={`flex items-center justify-center h-screen text-xl font-semibold ${
-          darkMode ? "text-gray-400" : "text-gray-600"
-        }`}
-      >
-        Loading your tickets...
-      </div>
-    );
-  }
+  const handleDelete = async (id) => {
+    if (confirm("Delete this ticket?")) await remove(ref(db, `tickets/${id}`));
+  };
+
+  const handleAddComment = async (ticketId, text) => {
+    if (!user || !text.trim()) return;
+    await push(ref(db, `tickets/${ticketId}/comments`), {
+      text,
+      author: user.email,
+      timestamp: new Date().toISOString(),
+    });
+  };
+
+  const getUserDisplay = () => (user ? `${user.email}` : "Unknown");
 
   return (
-    <div
-      className={`min-h-screen transition-colors duration-500 font-sans ${
-        darkMode ? "bg-gray-900 text-gray-100" : "bg-gray-50 text-gray-900"
-      }`}
-    >
+    <div className={`${darkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-black"} min-h-screen`}>
       <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
+      <main className="max-w-5xl mx-auto px-4 py-10">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-indigo-500">🎫 My Tickets</h1>
 
-      <main className="max-w-4xl mx-auto p-6">
-        <div className="flex items-center justify-between mb-8">
-          <h1
-            className={`text-3xl font-extrabold ${
-              darkMode ? "text-red-300" : "text-red-600"
+        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+          <input
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search my tickets..."
+            className={`px-4 py-2 rounded-xl border w-full sm:flex-1 ${
+              darkMode ? "bg-gray-700 border-gray-600" : "bg-gray-100 border-gray-300"
+            }`}
+          />
+          <select
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+            className={`px-4 py-2 rounded-xl border ${
+              darkMode ? "bg-gray-700 border-gray-600" : "bg-gray-100 border-gray-300"
             }`}
           >
-            🎟️ My Tickets ({filteredTickets.length})
-          </h1>
-
-          {isTechnician && (
-            <div className="flex items-center gap-2">
-              <label
-                htmlFor="userFilter"
-                className={`font-semibold ${
-                  darkMode ? "text-gray-300" : "text-gray-700"
-                }`}
-              >
-                Filter by user:
-              </label>
-              <select
-                id="userFilter"
-                value={filterUser}
-                onChange={(e) => setFilterUser(e.target.value)}
-                className={`px-3 py-2 rounded border ${
-                  darkMode
-                    ? "bg-gray-700 border-gray-600 text-gray-200"
-                    : "bg-gray-100 border-gray-300 text-gray-900"
-                }`}
-              >
-                <option value="">All Users</option>
-                {Object.entries(allUsers).map(([uid, user]) => (
-                  <option key={uid} value={uid}>
-                    {user.name} {user.surname} ({user.email})
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
+            <option value="all">All</option>
+            <option value="open">Open</option>
+            <option value="resolved">Resolved</option>
+          </select>
         </div>
 
-        {filteredTickets.length === 0 ? (
-          <p
-            className={`text-center italic ${
-              darkMode ? "text-gray-400" : "text-gray-600"
-            }`}
-          >
-            You haven’t logged any tickets yet.
-          </p>
-        ) : (
-          <ul className="space-y-8">
-            {filteredTickets.map(([id, ticket]) => (
-              <li
-                key={id}
-                className={`rounded-3xl p-6 shadow-xl flex flex-col gap-4 ${
-                  darkMode ? "bg-gray-800" : "bg-white"
-                }`}
-              >
-                <div>
-                  <h2 className="text-xl font-semibold">{ticket.title}</h2>
-                  <p className="text-md mb-2">{ticket.description}</p>
-                  <span
-                    className={`inline-block text-sm font-bold px-3 py-1 rounded-full ${
-                      ticket.status === "resolved"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-yellow-100 text-yellow-700"
-                    }`}
-                  >
-                    Status: {ticket.status}
-                  </span>
-                  <p className="text-xs text-gray-400 mt-2">
-                    Logged at:{" "}
-                    {ticket.createdAt ||
-                      new Date(ticket.created).toLocaleString()}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Logged by: {ticket.loggedBy || "Unknown"}
-                  </p>
-       {ticket.isLoggedByTech && ticket.loggedFor && (
-  <p className="text-xs text-gray-500 mt-1">
-    Logged for:{" "}
-    {allUsers[ticket.loggedFor]?.email
-      ? allUsers[ticket.loggedFor].email
-      : "Unknown user"}
-  </p>
-)}
-
-                </div>
-
-                <div className="mt-4">
-                  <h3 className="font-semibold mb-3 text-sm">💬 Comments:</h3>
-                  {ticket.comments ? (
-                    <ul className="space-y-2 max-h-48 overflow-y-auto">
-                      {Object.entries(ticket.comments).map(([cid, comment]) => (
-                        <li
-                          key={cid}
-                          className={`text-sm rounded-md p-2 ${
-                            darkMode
-                              ? "bg-gray-700 text-gray-200"
-                              : "bg-gray-100 text-gray-900"
-                          }`}
-                        >
-                          <span className="font-bold text-indigo-400">
-                            {comment.author}
-                          </span>
-                          : {comment.text}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p
-                      className={`text-xs italic ${
-                        darkMode ? "text-gray-400" : "text-gray-600"
-                      }`}
-                    >
-                      No comments yet.
-                    </p>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
+        <ul className="space-y-6">
+          {filtered.map(([id, ticket]) => (
+            <TicketCard
+              key={id}
+              id={id}
+              ticket={ticket}
+              userDisplay={() => getUserDisplay()}
+              onMarkResolved={handleMarkResolved}
+              onDelete={handleDelete}
+              onAddComment={handleAddComment}
+              darkMode={darkMode}
+            />
+          ))}
+        </ul>
       </main>
     </div>
   );
