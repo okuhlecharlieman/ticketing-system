@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { getAuth } from 'firebase/auth'; // From /lib/firebase.js (server-side import)
-import { firebaseApp } from '../lib/firebase'; // Assume server-side init
+import { app as firebaseApp } from '../lib/firebase';
 
 export const dynamic = 'force-static'; // Static for faster load
 
