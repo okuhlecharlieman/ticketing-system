@@ -1,5 +1,5 @@
 {
   "projects": {
-    "default": "ticketing-system-dc29d"
+    "default": "your-firebase-project-id"  // Replace with your actual project ID from Firebase console
   }
 }
