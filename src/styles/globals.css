@@ -2,12 +2,35 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Base styles */
 body {
-  @apply bg-white text-black dark:bg-gray-900 dark:text-white;
-  font-family: Arial, sans-serif;
+  @apply bg-white text-black dark:bg-[#121212] dark:text-white transition-colors duration-300;
+  font-family: 'Arial', sans-serif;
 }
 
 /* Responsive container */
 .container {
-  @apply max-w-md mx-auto md:max-w-2xl lg:max-w-4xl;
+  @apply max-w-md mx-auto px-4 md:max-w-2xl lg:max-w-5xl;
+}
+
+/* Heart FM Colors */
+:root {
+  --heart-red: #e30613;
+  --heart-dark: #a6000f;
+  --heart-pink: #ffb6c1;
+  --heart-gray: #333333;
+  --heart-bg: #f9f9f9;
+}
+
+/* Example usage */
+.btn-heart {
+  @apply bg-[var(--heart-red)] text-white font-semibold py-2 px-4 rounded hover:bg-[var(--heart-dark)] transition;
+}
+
+.text-heart {
+  @apply text-[var(--heart-red)];
+}
+
+.bg-heart {
+  @apply bg-[var(--heart-bg)];
 }
