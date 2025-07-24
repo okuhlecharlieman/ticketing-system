@@ -122,15 +122,28 @@ Full details in [Hetzner Next.js guide] or see your hosting provider docs.
 ## Folder Structure
 
 ```plaintext
-/
-├── components/           // Reusable React components
-├── context/              // Context providers (e.g. dark mode)
-├── lib/                  // Firebase config and helpers
-├── pages/                // Next.js routes
-├── public/               // Static assets
-├── styles/               // Tailwind/global styles
-├── .env.example          // Environment variable template
-├── README.md             // This file
+ticketing-system/
+├── .firebaserc              // Firebase project configuration
+├── .gitignore               // Git ignored files list
+├── netlify/                 // Netlify deployment settings
+├── public/                  // Static assets
+└── src/                     // Source files
+    ├── app/                 // Application routes
+    │   ├── log-ticket/      // Log a new ticket
+    │   ├── my-tickets/      // View user's tickets
+    │   ├── signin/          // Sign-in page
+    │   ├── signup/          // Sign-up page
+    │   └── technician/      // Technician dashboard
+    ├── components/          // Reusable UI components
+    │   └── Navbar.js        // Navigation bar component
+    ├── context/             // React context providers
+    ├── lib/                 // Firebase config and utilities
+    │   └── firebase.js      // Firebase initialization
+    ├── favicon.ico          // Site icon
+    ├── globals.css          // Global styles
+    ├── layout.js            // Root layout component
+    └── page.js              // Main entry page
+
 ```
 
 
