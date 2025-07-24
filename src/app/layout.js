@@ -1,8 +1,7 @@
-// src/app/layout.js
-import { AuthProvider } from '../context/AuthContext';
-import { ThemeProvider } from '../context/ThemeContext';
-import Navbar from '../components/Navbar';
-import '../styles/globals.css';  // Import global styles
+import { AuthProvider } from '../context/AuthContext';  // Correct path
+import { ThemeProvider } from '../context/ThemeContext';  // Correct path
+import Navbar from '../components/Navbar';  // Correct path
+import '../styles/globals.css';  // Correct relative path (from /app/ to /styles/)
 
 export const metadata = {
   title: 'Ticketing System',

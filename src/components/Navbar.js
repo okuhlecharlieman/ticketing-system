@@ -1,4 +1,3 @@
-// src/components/Navbar.js
 'use client';
 
 import { useContext } from 'react';

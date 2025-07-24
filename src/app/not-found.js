@@ -1,4 +1,3 @@
-// src/app/not-found.js
 export default function NotFound() {
   return (
     <div className="text-center p-4">

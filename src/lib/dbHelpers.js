@@ -1,4 +1,3 @@
-// src/lib/dbHelpers.js
 'use server';  // Mark as server-only
 
 import { ref, onValue, query, orderByChild, equalTo, limitToFirst } from 'firebase/database';

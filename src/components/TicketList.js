@@ -1,4 +1,3 @@
-// src/components/TicketList.js
 import Link from 'next/link';
 
 export default function TicketList({ tickets, isTechnician = false }) {

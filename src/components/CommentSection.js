@@ -1,4 +1,3 @@
-// src/components/CommentSection.js
 'use client';
 
 import { useState, useEffect } from 'react';

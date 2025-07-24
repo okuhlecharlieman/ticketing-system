@@ -19,19 +19,21 @@ const app = !getApps().length ? initializeApp(firebaseConfig) : getApps()[0];
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-// For server-side (e.g., in server actions), use admin SDK if needed
+// For server-side only (e.g., in server actions), lazy-load admin to avoid client-side errors
 let admin;
 if (typeof window === 'undefined') {
-  admin = require('firebase-admin');
-  if (!admin.apps.length) {
-    admin.initializeApp({
-      credential: admin.credential.cert({
+  const adminLib = require('firebase-admin');
+  if (!adminLib.apps.length) {
+    admin = adminLib.initializeApp({
+      credential: adminLib.credential.cert({
         projectId: firebaseConfig.projectId,
         clientEmail: process.env.FIREBASE_CLIENT_EMAIL,  // Add to .env for server
         privateKey: process.env.FIREBASE_PRIVATE_KEY,
       }),
       databaseURL: firebaseConfig.databaseURL,
     });
+  } else {
+    admin = adminLib.apps[0];
   }
 }
 

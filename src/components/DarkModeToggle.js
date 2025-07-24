@@ -1,8 +1,7 @@
-// src/components/DarkModeToggle.js
 'use client';
 
 import { useContext } from 'react';
-import { ThemeContext } from '../context/ThemeContext';
+import { ThemeContext } from '../context/ThemeContext';  // Correct relative path (assuming same level as /components/)
 
 export default function DarkModeToggle() {
   const { isDarkMode, toggleDarkMode } = useContext(ThemeContext);

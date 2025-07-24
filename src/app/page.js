@@ -1,28 +1,31 @@
-// src/app/ticket/[id]/page.js
-import { Suspense } from 'react';
-import CommentSection from '../../../components/CommentSection';
-import { fetchTicket } from '../../../lib/dbHelpers';
+import { redirect } from 'next/navigation';
+import { getAuth } from 'firebase/auth'; // From /lib/firebase.js (server-side import)
+import { firebaseApp } from '../lib/firebase'; // Assume server-side init
 
-export default async function TicketPage({ params }) {
-  const ticket = await fetchTicket(params.id);
+export const dynamic = 'force-static'; // Static for faster load
 
-  return (
-    <div className="p-4">
-      <h1>{ticket.title}</h1>
-      <p>{ticket.description}</p>
-      <Suspense fallback={<div>Loading comments...</div>}>
-        <CommentSection ticketId={params.id} />
-      </Suspense>
-      {/* Add resolve button if technician */}
-    </div>
-  );
+export default async function Home() {
+  const auth = getAuth(firebaseApp);
+  const user = auth.currentUser; // Server-side check (use admin SDK for real server auth)
+
+  if (!user) {
+    redirect('/signin');
+  }
+
+  // Fetch role from Firebase (server-side)
+  const role = await fetchUserRole(user.uid); // Implement in /lib/dbHelpers.js
+
+  if (role === 'technician') {
+    redirect('/technician');
+  } else {
+    redirect('/my-tickets');
+  }
+
+  return <div>Loading...</div>; // Fallback (should not reach here)
 }
 
-// Add to /lib/dbHelpers.js
-export async function fetchTicket(id) {
-  return new Promise((resolve) => {
-    onValue(ref(db, 'tickets/' + id), (snapshot) => {
-      resolve(snapshot.val() || {});
-    }, { onlyOnce: true });
-  });
+// Helper (add to /lib/dbHelpers.js if not there; no duplicate here)
+async function fetchUserRole(uid) {
+  // Use Firebase admin SDK for server fetch
+  return 'user'; // Placeholder
 }
