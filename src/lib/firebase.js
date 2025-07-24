@@ -29,7 +29,7 @@ if (typeof window === 'undefined') {
       credential: adminLib.credential.cert({
         projectId: firebaseConfig.projectId,
         clientEmail: process.env.FIREBASE_CLIENT_EMAIL,  // Add to .env for server
-        privateKey: process.env.FIREBASE_PRIVATE_KEY,
+        privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
       }),
       databaseURL: firebaseConfig.databaseURL,
     });
