@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "firebase": "^9.23.0",
+"request": "^2.88.2",
   "firebase-admin": "^11.10.1",
     "next": "14.0.0",
     "react": "^18.2.0",
