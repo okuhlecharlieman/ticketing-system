@@ -1,11 +1,11 @@
+export const dynamic = 'force-dynamic';
+
 import { Suspense } from 'react';
 import TicketList from '../../components/TicketList';
-import { fetchUserTickets } from '../../lib/dbHelpers';
-
-export const revalidate = 60;
+import { fetchUserTickets } from '../../lib/dbHelpers'; // Server helper
 
 export default async function MyTickets() {
-  const tickets = await fetchUserTickets();
+  const tickets = await fetchUserTickets(); // Server fetch, will run per request
 
   return (
     <div className="p-4">
