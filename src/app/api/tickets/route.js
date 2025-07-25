@@ -1,27 +1,25 @@
-import { NextResponse } from 'next/server';
+'use server';
+
 import { ref, push } from 'firebase/database';
-import { db, auth } from '@/lib/firebase';
+import { db } from '../../../lib/firebase';
+import { auth } from '../../../lib/firebase';
 
-export async function POST(req) {
+export async function createTicket(prevState, formData) {
+  const user = auth.currentUser;
+  if (!user) return { error: 'Unauthorized' };
+
+  const ticketData = {
+    title: formData.get('title'),
+    description: formData.get('description'),
+    loggedByUid: user.uid,
+    status: 'open',
+    createdAt: Date.now(),
+  };
+
   try {
-    const { title, description } = await req.json();
-
-    const user = auth.currentUser;
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const ticketData = {
-      title,
-      description,
-      loggedByUid: user.uid,
-      status: 'open',
-      createdAt: Date.now(),
-    };
-
     await push(ref(db, 'tickets'), ticketData);
-    return NextResponse.json({ success: true });
+    return { success: true };
   } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return { error: error.message };
   }
 }
