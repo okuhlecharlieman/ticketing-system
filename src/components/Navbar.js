@@ -6,7 +6,7 @@ import { AuthContext } from '../context/AuthContext';
 import DarkModeToggle from './DarkModeToggle';
 
 export default function Navbar() {
-  const { user, logout } = useContext(AuthContext);  // Assume logout in AuthContext
+  const { user, logout } = useContext(AuthContext);
 
   return (
     <nav className="bg-primary text-white p-4 flex justify-between items-center">

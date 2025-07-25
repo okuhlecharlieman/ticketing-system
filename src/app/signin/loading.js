@@ -1,3 +1,1 @@
-export default function Loading() {
-  return <div>Loading sign-in...</div>;
-}
+export default function Loading() { return <div>Loading sign-in...</div>; }

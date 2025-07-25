@@ -1,4 +1,4 @@
-'use client'; // Client for auth events
+'use client';
 
 import { useState } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
@@ -11,7 +11,7 @@ export default function SignIn() {
   const handleSignIn = async () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      window.location.href = '/'; // Or use next/navigation
+      window.location.href = '/';
     } catch (error) {
       console.error(error);
     }

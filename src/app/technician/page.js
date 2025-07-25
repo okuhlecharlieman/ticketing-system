@@ -3,7 +3,7 @@ import { Suspense } from 'react';
 import TicketList from '../../components/TicketList';
 import { fetchAllTickets, checkIsTechnician } from '../../lib/dbHelpers';
 
-export const revalidate = 30; // Frequent revalidation for dashboard
+export const revalidate = 30;
 
 export default async function Technician() {
   const isTechnician = await checkIsTechnician();
@@ -15,7 +15,7 @@ export default async function Technician() {
     <div className="p-4">
       <h1>Technician Dashboard</h1>
       <Suspense fallback={<div>Loading tickets...</div>}>
-        <TicketList tickets={tickets} isTechnician={true} /> {/* Add filter UI */}
+        <TicketList tickets={tickets} isTechnician={true} />
       </Suspense>
     </div>
   );

@@ -8,7 +8,7 @@ export default function TicketList({ tickets, isTechnician = false }) {
           <Link href={`/ticket/${ticket.id}`}>
             <h2>{ticket.title}</h2>
             <p>Status: {ticket.status}</p>
-            {isTechnician && <button>Resolve</button>}  {/* Add logic via server action */}
+            {isTechnician && <button>Resolve</button>}
           </Link>
         </li>
       ))}

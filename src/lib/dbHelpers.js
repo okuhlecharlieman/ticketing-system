@@ -1,4 +1,4 @@
-'use server';  // Mark as server-only
+'use server';
 
 import { ref, onValue, query, orderByChild, equalTo, limitToFirst } from 'firebase/database';
 import { db } from './firebase';
@@ -13,7 +13,7 @@ export async function fetchUserTickets(limit = 20) {
       ref(db, 'tickets'),
       orderByChild('loggedByUid'),
       equalTo(user.uid),
-      limitToFirst(limit)  // Limit for performance
+      limitToFirst(limit)
     );
     onValue(ticketsRef, (snapshot) => {
       const data = snapshot.val() || {};

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useFormState } from 'react-dom';
-import { createTicket } from '../../app/api/tickets/route'; // Server action
+import { createTicket } from '../../app/api/tickets/route'; // Fixed path
 
 export default function TicketForm() {
   const [state, formAction] = useFormState(createTicket, null);

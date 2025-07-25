@@ -12,7 +12,6 @@ export default async function TicketPage({ params }) {
       <Suspense fallback={<div>Loading comments...</div>}>
         <CommentSection ticketId={params.id} />
       </Suspense>
-      {/* Add resolve button if technician */}
     </div>
   );
 }

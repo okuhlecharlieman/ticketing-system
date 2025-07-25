@@ -1,7 +1,7 @@
-import { AuthProvider } from '../context/AuthContext';  // Correct path
-import { ThemeProvider } from '../context/ThemeContext';  // Correct path
-import Navbar from '../components/Navbar';  // Correct path
-import '../styles/globals.css';  // Correct relative path (from /app/ to /styles/)
+import { AuthProvider } from '../context/AuthContext';
+import { ThemeProvider } from '../context/ThemeContext';
+import Navbar from '../components/Navbar';
+import '../styles/globals.css';
 
 export const metadata = {
   title: 'Ticketing System',

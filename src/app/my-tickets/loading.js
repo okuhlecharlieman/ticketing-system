@@ -1,3 +1,1 @@
-export default function Loading() {
-  return <div>Loading my tickets...</div>;
-}
+export default function Loading() { return <div>Loading my tickets...</div>; }
