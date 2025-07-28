@@ -1,8 +1,9 @@
+// src/components/TicketForm.js
 'use client';
 
 import { useState } from 'react';
 import { useFormState } from 'react-dom';
-import { createTicket } from '../../app/api/tickets/route'; // Fixed path
+import { createTicket } from '../../app/api/tickets/route';  // Corrected relative path (ensure /app/api/tickets/route.js exists)
 
 export default function TicketForm() {
   const [state, formAction] = useFormState(createTicket, null);
