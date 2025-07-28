@@ -14,6 +14,9 @@ const nextConfig = {
         loader: 'next-swc-loader',  // Ensure SWC handles modern syntax
       },
     });
+  experimental: {
+    webpackBuildWorker: true,  // Force-enable if custom config disables it (remove after upgrading to >=14.1.0)
+  },
     return config;
   },
 };
