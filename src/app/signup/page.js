@@ -6,6 +6,7 @@ import { ref, set } from "firebase/database";
 import { useRouter } from "next/navigation";
 import Navbar from "../../components/Navbar";
 import { useDarkMode } from "../../context/DarkModeContext";
+import Link from "next/link";
 
 export default function SignUp() {
   const [email, setEmail] = useState("");
@@ -116,9 +117,9 @@ export default function SignUp() {
 
           <p className="mt-6 text-sm text-center text-gray-500 dark:text-gray-400">
             Already have an account?{" "}
-            <a href="/signin" className="text-indigo-600 dark:text-indigo-400 underline">
+            <Link href="/signin" className="text-indigo-600 dark:text-indigo-400 underline">
               Sign In
-            </a>
+            </Link>
           </p>
         </div>
       </div>
