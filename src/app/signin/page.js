@@ -14,13 +14,17 @@ export default function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
   const { darkMode, setDarkMode } = useDarkMode();
   const router = useRouter();
 
-  // If already logged in, fetch role and redirect
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) return;
+      if (!user) {
+        setCheckingAuth(false);
+        return;
+      }
       try {
         const snap = await get(ref(db, `users/${user.uid}`));
         const isTech = snap.val()?.isTechnician;
@@ -35,15 +39,29 @@ export default function SignIn() {
   const handleSignIn = async (e) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
     try {
       const cred = await signInWithEmailAndPassword(auth, email, password);
       const snap = await get(ref(db, `users/${cred.user.uid}`));
       const isTech = snap.val()?.isTechnician;
-      router.push(isTech ? "/technician" : "/log-ticket");
+      router.replace(isTech ? "/technician" : "/log-ticket");
     } catch {
       setError("Invalid email or password.");
     }
+    setLoading(false);
   };
+
+  if (checkingAuth) {
+    return (
+      <div
+        className={`${
+          darkMode ? "bg-gray-900 text-gray-100" : "bg-gray-50 text-gray-900"
+        } min-h-screen flex justify-center items-center transition-colors duration-500`}
+      >
+        <p>Checking user status...</p>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -69,9 +87,11 @@ export default function SignIn() {
 
           <form onSubmit={handleSignIn}>
             <input
+              autoFocus
               type="email"
               placeholder="Company Email"
               value={email}
+              aria-label="Company Email"
               onChange={(e) => setEmail(e.target.value)}
               required
               className={`w-full mb-5 px-5 py-3 rounded-2xl border placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition ${
@@ -85,6 +105,7 @@ export default function SignIn() {
               type="password"
               placeholder="Password"
               value={password}
+              aria-label="Password"
               onChange={(e) => setPassword(e.target.value)}
               required
               className={`w-full mb-6 px-5 py-3 rounded-2xl border placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition ${
@@ -95,14 +116,19 @@ export default function SignIn() {
             />
 
             {error && (
-              <div className="text-red-500 text-sm mb-4">{error}</div>
+              <div role="alert" className="text-red-500 text-sm mb-4">
+                {error}
+              </div>
             )}
 
             <button
+              disabled={loading}
               type="submit"
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-3xl shadow-lg transition transform hover:-translate-y-0.5 active:translate-y-0"
+              className={`w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-3xl shadow-lg transition transform hover:-translate-y-0.5 active:translate-y-0 ${
+                loading ? "opacity-50 cursor-not-allowed" : ""
+              }`}
             >
-              🔓 Sign In
+              {loading ? "Signing In..." : "🔓 Sign In"}
             </button>
           </form>
 
