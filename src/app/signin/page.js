@@ -48,9 +48,7 @@ export default function SignIn() {
   return (
     <div
       className={`${
-        darkMode
-          ? "bg-gray-900 text-gray-100"
-          : "bg-gray-50 text-gray-900"
+        darkMode ? "bg-gray-900 text-gray-100" : "bg-gray-50 text-gray-900"
       } min-h-screen transition-colors duration-500`}
     >
       <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
@@ -110,11 +108,12 @@ export default function SignIn() {
 
           <p className="mt-6 text-sm text-center text-gray-500 dark:text-gray-400">
             Don&apos;t have an account?{" "}
-          <Link href="/signup" className="text-indigo-600 dark:text-indigo-400 underline">
-    Sign Up
-  </Link>
+            <Link
+              href="/signup"
+              className="text-indigo-600 dark:text-indigo-400 underline"
+            >
               Sign Up
-            </a>
+            </Link>
           </p>
         </div>
       </div>
