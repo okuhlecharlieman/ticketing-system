@@ -9,13 +9,14 @@ const nextConfig = {
         net: false,
         tls: false,
         crypto: false,
-        stream: false,
-        undici: false
+        stream: false
       };
     }
     return config;
   },
-  swcMinify: false // Temporarily disable SWC minification
+  experimental: {
+    serverActions: true
+  }
 };
 
 // Change module.exports to export default for ESM
