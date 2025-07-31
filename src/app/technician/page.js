@@ -65,8 +65,8 @@ export default function Technician() {
     return `${user.name} ${user.surname} (${user.email})`;
   };
 
-  const filteredTickets = useMemo(() => {
-    return tickets.filter(([_, ticket]) => {
+  const filteredAndSortedTickets = useMemo(() => {
+    const filtered = tickets.filter(([_, ticket]) => {
       const term = searchTerm.toLowerCase();
       const matchesSearch =
         ticket.title.toLowerCase().includes(term) ||
@@ -75,22 +75,21 @@ export default function Technician() {
         filterStatus === "all" || ticket.status === filterStatus;
       return matchesSearch && matchesStatus;
     });
-  }, [tickets, searchTerm, filterStatus]); // Removed unnecessary allUsers dependency
 
-  const sortedAndGroupedTickets = useMemo(() => {
-    return filteredTickets.sort((a, b) => {
+    // Sort tickets after filtering
+    return filtered.sort((a, b) => {
       const aDate = new Date(a[1].createdAt || a[1].created);
       const bDate = new Date(b[1].createdAt || b[1].created);
       return bDate - aDate;
     });
-  }, [filteredTickets, sortOrder]); // Removed unnecessary getUserDisplay dependency
+  }, [tickets, searchTerm, filterStatus]); // Removed sortOrder from dependencies
 
   const paginatedTickets = useMemo(() => {
-    return sortedAndGroupedTickets.slice(
+    return filteredAndSortedTickets.slice(
       (page - 1) * ITEMS_PER_PAGE,
       page * ITEMS_PER_PAGE
     );
-  }, [sortedAndGroupedTickets, page]);
+  }, [filteredAndSortedTickets, page]);
 
   const setLoadingForId = (setter, id, isLoading) => {
     setter((prev) => {
