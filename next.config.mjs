@@ -1,7 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   webpack: (config, { isServer }) => {
-    // Add polyfills for node modules
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
@@ -13,11 +12,7 @@ const nextConfig = {
       };
     }
     return config;
-  },
-  experimental: {
-    serverActions: true
   }
 };
 
-// Change module.exports to export default for ESM
 export default nextConfig;

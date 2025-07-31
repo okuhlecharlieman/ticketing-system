@@ -80,64 +80,71 @@ export default function LogTicket() {
     }
   };
 
-  const submitTicket = async () => {
-    if (isSubmitting) return;
+// At the top of submitTicket function, replace the existing implementation with:
+const submitTicket = async () => {
+  if (isSubmitting) return;
 
-    if (!title.trim() || !description.trim()) {
-      setMessage("⚠️ Please fill in all fields.");
-      return;
-    }
-    if (!user) {
-      setMessage("⚠️ You must be logged in to submit a ticket.");
-      return;
-    }
+  if (!title.trim() || !description.trim()) {
+    setMessage("⚠️ Please fill in all fields.");
+    return;
+  }
+  if (!user) {
+    setMessage("⚠️ You must be logged in to submit a ticket.");
+    return;
+  }
 
-    setIsSubmitting(true);
+  setIsSubmitting(true);
 
-    try {
+  try {
     const ticketData = {
-  title: title.trim(),
-  description: description.trim(),
-  status: "open",
-  created: Date.now(),
-  createdAt: new Date().toLocaleString(),
-  loggedBy: user.email,
-  loggedByUid: user.uid,
-  loggedFor: isTech && selectedUser ? selectedUser : user.uid, // always set loggedFor
-};
+      title: title.trim(),
+      description: description.trim(),
+      status: "open",
+      created: Date.now(),
+      createdAt: new Date().toLocaleString(),
+      loggedBy: user.email,
+      loggedByUid: user.uid,
+      loggedFor: isTech && selectedUser ? selectedUser : user.uid,
+    };
 
-if (isTech && selectedUser) {
-  ticketData.isLoggedByTech = true;
-}
+    if (isTech && selectedUser) {
+      ticketData.isLoggedByTech = true;
+    }
 
-
-      await push(ref(db, "tickets"), ticketData);
-
+    await push(ref(db, "tickets"), ticketData);
+    
+    try {
       const response = await fetch("/.netlify/functions/sendTicketEmail", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: ticketData.title, description: ticketData.description, email: user.email }),
+        body: JSON.stringify({
+          title: ticketData.title,
+          description: ticketData.description,
+          email: user.email
+        })
       });
 
       if (!response.ok) {
-        setMessage("⚠️ Email notification failed.");
-           // Reset form only on success
-        setTitle("");
-        setDescription("");
-        setSelectedUser("");
-      } else {
-        setMessage("✅ Ticket submitted successfully!");
-        // Reset form only on success
-        setTitle("");
-        setDescription("");
-        setSelectedUser("");
+        throw new Error('Email notification failed');
       }
-    } catch (err) {
-      setMessage("❌ Error submitting ticket: " + err.message);
-    } finally {
-      setIsSubmitting(false);
+      
+      setMessage("✅ Ticket submitted successfully!");
+      setTitle("");
+      setDescription("");
+      setSelectedUser("");
+    } catch (emailError) {
+      console.error('Email notification error:', emailError);
+      setMessage("✅ Ticket submitted but email notification failed.");
+      setTitle("");
+      setDescription("");
+      setSelectedUser("");
     }
-  };
+  } catch (err) {
+    setMessage("❌ Error submitting ticket: " + err.message);
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   return (
     <div
