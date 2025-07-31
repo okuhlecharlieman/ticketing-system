@@ -1,17 +1,13 @@
-import Link from 'next/link';
+'use client';
+const TicketList = ({ tickets, role, onOpenModal }) => (
+  <ul className="ticket-list">
+    {tickets.map((ticket) => (
+      <li key={ticket.id} className="ticket-item" onClick={() => onOpenModal(ticket)}>
+        <h3 className={ticket.status === 'Resolved' || ticket.status === 'Closed' ? 'status-resolved' : ''}>{ticket.title}</h3>
+        <p>Status: {ticket.status} | Priority: <span className={`priority-${ticket.priority.toLowerCase()}`}>{ticket.priority}</span> | Category: {ticket.category} | Assignee: {ticket.assignee || 'Unassigned'}</p>
+      </li>
+    ))}
+  </ul>
+);
 
-export default function TicketList({ tickets, isTechnician = false }) {
-  return (
-    <ul className="space-y-4">
-      {tickets.map((ticket) => (
-        <li key={ticket.id} className="border p-4 rounded">
-          <Link href={`/ticket/${ticket.id}`}>
-            <h2>{ticket.title}</h2>
-            <p>Status: {ticket.status}</p>
-            {isTechnician && <button>Resolve</button>}
-          </Link>
-        </li>
-      ))}
-    </ul>
-  );
-}
+export default TicketList;
