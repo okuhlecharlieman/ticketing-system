@@ -6,6 +6,8 @@ import { ref, onValue, update, remove, get, push } from "firebase/database";
 import { useRouter } from "next/navigation";
 import Navbar from "../../components/Navbar";
 import { useDarkMode } from "../../context/DarkModeContext";
+import { LoadingSkeleton } from "../../components/LoadingSkeleton";
+import { useDebounce } from "../../hooks/useDebounce";
 
 export default function Technician() {
   const [tickets, setTickets] = useState([]);
@@ -16,6 +18,10 @@ export default function Technician() {
   const [allUsers, setAllUsers] = useState({});
   const [commentLoadingIds, setCommentLoadingIds] = useState(new Set());
   const [actionLoadingIds, setActionLoadingIds] = useState(new Set());
+  const [page, setPage] = useState(1);
+
+  const ITEMS_PER_PAGE = 10;
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   const { darkMode, setDarkMode } = useDarkMode();
   const router = useRouter();
@@ -78,6 +84,28 @@ export default function Technician() {
       return matchesTerm && matchesStatus;
     });
   }, [tickets, searchTerm, filterStatus, allUsers]);
+
+  const paginatedTickets = useMemo(() => {
+    const filtered = tickets.filter(([_, ticket]) => {
+      const term = debouncedSearchTerm.toLowerCase();
+      const loggedByDisplay = getUserDisplay(ticket.loggedByUid).toLowerCase();
+      const loggedForDisplay = getUserDisplay(ticket.loggedFor)?.toLowerCase?.() || "";
+
+      const matchesTerm =
+        ticket.title?.toLowerCase().includes(term) ||
+        ticket.description?.toLowerCase().includes(term) ||
+        ticket.status?.toLowerCase().includes(term) ||
+        (ticket.loggedBy || "").toLowerCase().includes(term) ||
+        loggedByDisplay.includes(term) ||
+        loggedForDisplay.includes(term);
+
+      const matchesStatus = filterStatus === "all" || ticket.status === filterStatus;
+
+      return matchesTerm && matchesStatus;
+    });
+
+    return filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
+  }, [tickets, debouncedSearchTerm, filterStatus, allUsers, page]);
 
   const setLoadingForId = (setter, id, isLoading) => {
     setter((prev) => {
@@ -198,6 +226,32 @@ export default function Technician() {
     document.body.removeChild(link);
   };
 
+  const Pagination = () => (
+    <div className="flex justify-center gap-2 mt-6">
+      <button
+        onClick={() => setPage((p) => Math.max(1, p - 1))}
+        disabled={page === 1}
+        className={`px-4 py-2 rounded ${
+          darkMode ? "bg-gray-700" : "bg-gray-200"
+        }`}
+      >
+        Previous
+      </button>
+      <span className="px-4 py-2">
+        Page {page} of {Math.ceil(filteredTickets.length / ITEMS_PER_PAGE)}
+      </span>
+      <button
+        onClick={() => setPage((p) => p + 1)}
+        disabled={page >= Math.ceil(filteredTickets.length / ITEMS_PER_PAGE)}
+        className={`px-4 py-2 rounded ${
+          darkMode ? "bg-gray-700" : "bg-gray-200"
+        }`}
+      >
+        Next
+      </button>
+    </div>
+  );
+
   if (loading || isTechnician === null) {
     return (
       <div
@@ -270,8 +324,8 @@ export default function Technician() {
           </div>
 
           {/* Ticket List */}
-          <ul className="space-y-6">
-            {filteredTickets.length === 0 && (
+          <ul className="space-y-8">
+            {paginatedTickets.length === 0 && (
               <li
                 className={`text-center italic ${
                   darkMode ? "text-gray-400" : "text-gray-600"
@@ -280,7 +334,7 @@ export default function Technician() {
                 No tickets match your criteria.
               </li>
             )}
-            {filteredTickets.map(([id, ticket]) => {
+            {paginatedTickets.map(([id, ticket]) => {
               const isActionLoading = actionLoadingIds.has(id);
               const isCommentLoading = commentLoadingIds.has(id);
 
@@ -415,6 +469,7 @@ export default function Technician() {
               );
             })}
           </ul>
+          <Pagination />
         </div>
       </main>
     </div>

@@ -1,6 +1,19 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { DarkModeProvider } from '../context/DarkModeContext';
+import { ErrorBoundary } from '../components/ErrorBoundary';
+
+useEffect(() => {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/service-worker.js')
+      .then(registration => {
+        console.log('SW registered:', registration);
+      })
+      .catch(error => {
+        console.log('SW registration failed:', error);
+      });
+  }
+}, []);
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,7 +36,9 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-             <DarkModeProvider>{children}</DarkModeProvider>
+        <ErrorBoundary>
+          <DarkModeProvider>{children}</DarkModeProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );
