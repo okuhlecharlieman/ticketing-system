@@ -1,19 +1,8 @@
+import { useEffect } from 'react';
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { DarkModeProvider } from '../context/DarkModeContext';
 import { ErrorBoundary } from '../components/ErrorBoundary';
-
-useEffect(() => {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/service-worker.js')
-      .then(registration => {
-        console.log('SW registered:', registration);
-      })
-      .catch(error => {
-        console.log('SW registration failed:', error);
-      });
-  }
-}, []);
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,11 +20,21 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(registration => {
+          console.log('SW registered:', registration);
+        })
+        .catch(error => {
+          console.log('SW registration failed:', error);
+        });
+    }
+  }, []);
+
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ErrorBoundary>
           <DarkModeProvider>{children}</DarkModeProvider>
         </ErrorBoundary>

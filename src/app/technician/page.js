@@ -83,29 +83,19 @@ export default function Technician() {
 
       return matchesTerm && matchesStatus;
     });
-  }, [tickets, searchTerm, filterStatus, allUsers]);
+  }, [tickets, searchTerm, filterStatus, allUsers, getUserDisplay]);
+
+  const sortedTickets = useMemo(() => {
+    return [...filteredTickets].sort((a, b) => {
+      const aDate = new Date(a[1].createdAt || a[1].created);
+      const bDate = new Date(b[1].createdAt || b[1].created);
+      return bDate - aDate;
+    });
+  }, [filteredTickets, getUserDisplay]);
 
   const paginatedTickets = useMemo(() => {
-    const filtered = tickets.filter(([_, ticket]) => {
-      const term = debouncedSearchTerm.toLowerCase();
-      const loggedByDisplay = getUserDisplay(ticket.loggedByUid).toLowerCase();
-      const loggedForDisplay = getUserDisplay(ticket.loggedFor)?.toLowerCase?.() || "";
-
-      const matchesTerm =
-        ticket.title?.toLowerCase().includes(term) ||
-        ticket.description?.toLowerCase().includes(term) ||
-        ticket.status?.toLowerCase().includes(term) ||
-        (ticket.loggedBy || "").toLowerCase().includes(term) ||
-        loggedByDisplay.includes(term) ||
-        loggedForDisplay.includes(term);
-
-      const matchesStatus = filterStatus === "all" || ticket.status === filterStatus;
-
-      return matchesTerm && matchesStatus;
-    });
-
-    return filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
-  }, [tickets, debouncedSearchTerm, filterStatus, allUsers, page]);
+    return sortedTickets.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
+  }, [sortedTickets, page]);
 
   const setLoadingForId = (setter, id, isLoading) => {
     setter((prev) => {

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { db, auth } from "../lib/firebase";
 import { ref, push, onValue, get } from "firebase/database";
 import { Moon, Sun } from "lucide-react";
+import Image from "next/image";
 
 const logoUrl = "https://www.heartfm.co.za/content/uploads/2017/12/logo-dark.png";
 const NEWS_API_KEY = process.env.NEXT_PUBLIC_GNEWS_API_KEY;
@@ -75,7 +76,14 @@ export default function Home() {
       {/* Header */}
       <header className="sticky top-0 z-50 flex justify-between items-center px-4 md:px-8 py-4 shadow bg-red-500 dark:bg-red-800">
         <div className="flex items-center space-x-3">
-          <img src={logoUrl} alt="Heart FM Logo" className="h-8 sm:h-10 w-auto" />
+          <Image 
+            src={logoUrl}
+            alt="Heart FM Logo"
+            width={500}
+            height={300}
+            priority={true}
+            className="h-8 sm:h-10 w-auto"
+          />
           <span className="text-xl sm:text-2xl font-bold text-white">Tickitie</span>
         </div>
         <button
