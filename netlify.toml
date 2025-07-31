@@ -1,5 +1,5 @@
 [build]
-  command = "npm install --save-dev eslint && npm run build"
+  command = "npm ci && npm run build"
   publish = ".next"
 
 [[plugins]]
@@ -9,3 +9,4 @@
   NODE_VERSION = "18"
   NEXT_USE_NETLIFY_EDGE = "true"
   NODE_ENV = "production"
+  NEXT_TELEMETRY_DISABLED = "1"

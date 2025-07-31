@@ -32,12 +32,10 @@ export default function MyTickets() {
       const techStatus = userData?.isTechnician || false;
       setIsTechnician(techStatus);
 
-
-        // fetch all users for dropdown
-        const usersRef = ref(db, "users");
-        const usersSnap = await get(usersRef);
-        setAllUsers(usersSnap.val() || {});
-      
+      // fetch all users for dropdown
+      const usersRef = ref(db, "users");
+      const usersSnap = await get(usersRef);
+      setAllUsers(usersSnap.val() || {});
 
       // Subscribe tickets
       const ticketsRef = ref(db, "tickets");
@@ -63,11 +61,10 @@ export default function MyTickets() {
       );
     }
 
-  
-   if (filterUser) {
-  // Only show tickets where selected user is the recipient (loggedFor)
-  return ticket.loggedFor === filterUser;
-}
+    if (filterUser) {
+      // Only show tickets where selected user is the recipient (loggedFor)
+      return ticket.loggedFor === filterUser;
+    }
 
     // For tech no filter: show all tickets
     return true;
@@ -79,6 +76,33 @@ export default function MyTickets() {
     const u = allUsers[uid];
     return `${u.name} ${u.surname} (${u.email})`;
   };
+
+  // Pagination component that uses the filteredTickets variable
+  const Pagination = () => (
+    <div className="flex justify-center gap-2 mt-6">
+      <button
+        onClick={() => setPage((p) => Math.max(1, p - 1))}
+        disabled={page === 1}
+        className={`px-4 py-2 rounded ${
+          darkMode ? "bg-gray-700" : "bg-gray-200"
+        }`}
+      >
+        Previous
+      </button>
+      <span className="px-4 py-2">
+        Page {page} of {Math.ceil(filteredTickets.length / ITEMS_PER_PAGE || 1)}
+      </span>
+      <button
+        onClick={() => setPage((p) => p + 1)}
+        disabled={page >= Math.ceil(filteredTickets.length / ITEMS_PER_PAGE || 1)}
+        className={`px-4 py-2 rounded ${
+          darkMode ? "bg-gray-700" : "bg-gray-200"
+        }`}
+      >
+        Next
+      </button>
+    </div>
+  );
 
   if (loading) {
     return (
@@ -147,7 +171,7 @@ export default function MyTickets() {
               darkMode ? "text-gray-400" : "text-gray-600"
             }`}
           >
-            You haven’t logged any tickets yet.
+            You haven't logged any tickets yet.
           </p>
         ) : (
           <ul className="space-y-8">
@@ -173,20 +197,19 @@ export default function MyTickets() {
                   <p className="text-xs text-gray-400 mt-2">
                     Logged at:{" "}
                     {ticket.createdAt ||
-                      new Date(ticket.created).toLocaleString()}
+                      (ticket.created ? new Date(ticket.created).toLocaleString() : "Unknown")}
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
                     Logged by: {ticket.loggedBy || "Unknown"}
                   </p>
-       {ticket.isLoggedByTech && ticket.loggedFor && (
-  <p className="text-xs text-gray-500 mt-1">
-    Logged for:{" "}
-    {allUsers[ticket.loggedFor]?.email
-      ? allUsers[ticket.loggedFor].email
-      : "Unknown user"}
-  </p>
-)}
-
+                  {ticket.isLoggedByTech && ticket.loggedFor && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      Logged for:{" "}
+                      {allUsers[ticket.loggedFor]?.email
+                        ? allUsers[ticket.loggedFor].email
+                        : "Unknown user"}
+                    </p>
+                  )}
                 </div>
 
                 <div className="mt-4">
@@ -223,6 +246,9 @@ export default function MyTickets() {
             ))}
           </ul>
         )}
+
+        {/* Add the Pagination component here */}
+        <Pagination />
       </main>
     </div>
   );
