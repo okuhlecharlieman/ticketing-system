@@ -7,3 +7,10 @@
 
 [build.environment]
   NEXT_USE_NETLIFY_EDGE = "true"
+  NODE_VERSION = "18"
+
+# Add redirects for SPA behavior
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

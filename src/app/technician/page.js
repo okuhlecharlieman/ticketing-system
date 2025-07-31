@@ -66,36 +66,31 @@ export default function Technician() {
   };
 
   const filteredTickets = useMemo(() => {
-    const term = searchTerm.trim().toLowerCase();
     return tickets.filter(([_, ticket]) => {
-      const loggedByDisplay = getUserDisplay(ticket.loggedByUid).toLowerCase();
-      const loggedForDisplay = getUserDisplay(ticket.loggedFor)?.toLowerCase?.() || "";
-
-      const matchesTerm =
-        ticket.title?.toLowerCase().includes(term) ||
-        ticket.description?.toLowerCase().includes(term) ||
-        ticket.status?.toLowerCase().includes(term) ||
-        (ticket.loggedBy || "").toLowerCase().includes(term) ||
-        loggedByDisplay.includes(term) ||
-        loggedForDisplay.includes(term);
-
-      const matchesStatus = filterStatus === "all" || ticket.status === filterStatus;
-
-      return matchesTerm && matchesStatus;
+      const term = searchTerm.toLowerCase();
+      const matchesSearch =
+        ticket.title.toLowerCase().includes(term) ||
+        ticket.description.toLowerCase().includes(term);
+      const matchesStatus =
+        filterStatus === "all" || ticket.status === filterStatus;
+      return matchesSearch && matchesStatus;
     });
-  }, [tickets, searchTerm, filterStatus, allUsers, getUserDisplay]);
+  }, [tickets, searchTerm, filterStatus]); // Removed unnecessary allUsers dependency
 
-  const sortedTickets = useMemo(() => {
-    return [...filteredTickets].sort((a, b) => {
+  const sortedAndGroupedTickets = useMemo(() => {
+    return filteredTickets.sort((a, b) => {
       const aDate = new Date(a[1].createdAt || a[1].created);
       const bDate = new Date(b[1].createdAt || b[1].created);
       return bDate - aDate;
     });
-  }, [filteredTickets, getUserDisplay]);
+  }, [filteredTickets, sortOrder]); // Removed unnecessary getUserDisplay dependency
 
   const paginatedTickets = useMemo(() => {
-    return sortedTickets.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
-  }, [sortedTickets, page]);
+    return sortedAndGroupedTickets.slice(
+      (page - 1) * ITEMS_PER_PAGE,
+      page * ITEMS_PER_PAGE
+    );
+  }, [sortedAndGroupedTickets, page]);
 
   const setLoadingForId = (setter, id, isLoading) => {
     setter((prev) => {
@@ -198,7 +193,9 @@ export default function Technician() {
       formatValue(ticket.isLoggedByTech ? "Yes" : "No"),
     ]);
 
-    const csvContent = [headers.join(";"), ...rows.map((r) => r.join(";"))].join("\n");
+    const csvContent = [headers.join(";"), ...rows.map((r) => r.join(";"))].join(
+      "\n"
+    );
 
     const blob = new Blob([csvContent], {
       type: "text/csv;charset=utf-8;",
