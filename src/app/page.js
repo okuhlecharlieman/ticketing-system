@@ -93,7 +93,7 @@ export default function Home() {
         <section className="text-center">
           <h1 className="text-3xl sm:text-4xl font-bold mb-2">Hey there 👋</h1>
           <p className="text-gray-700 dark:text-gray-300 text-sm sm:text-base max-w-2xl mx-auto">
-            Log issues, check the latest news, and stay updated — all in one place.
+            Log issues, check the latest news, and stay updated all in one place.
           </p>
         </section>
 
