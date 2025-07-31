@@ -18,4 +18,5 @@ const nextConfig = {
   swcMinify: false // Temporarily disable SWC minification
 };
 
-module.exports = nextConfig;
+// Change module.exports to export default for ESM
+export default nextConfig;
