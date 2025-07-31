@@ -2,11 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
-import { auth } from "../../lib/firebase";
+import { auth, db } from "../../lib/firebase";
 import { ref, get } from "firebase/database";
 import { useRouter } from "next/navigation";
 import { useDarkMode } from "../../context/DarkModeContext";
-import { db } from "../../lib/firebase";
 import Link from "next/link";
 
 export default function SignIn() {
